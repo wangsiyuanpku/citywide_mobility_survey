@@ -19,6 +19,6 @@ deploy:
   local_dir: _book
   skip_cleanup: true
   verbose: true
-  github-token: $GITHUB_TOKEN
+  github-token: $GITHUB_PAT
   on:
     branch: master
