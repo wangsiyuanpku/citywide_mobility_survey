@@ -4,8 +4,8 @@ Report will be hosted at [placeholder](placeholder).
 
 ## TODO
 
-- [ ] Setup bookdown
-- [ ] Setup travis
+- [x] Setup bookdown
+- [x] Setup travis
 - [ ] Fill team information
 - [ ] How to divide up work
 - [ ] Research Questions
