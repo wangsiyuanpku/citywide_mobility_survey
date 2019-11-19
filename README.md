@@ -1,6 +1,6 @@
 # Analysis of Citywide Mobility Survey
 Final Project for EDAV, Fall 2019, Columbia University. 
-Report will be hosted at [placeholder](placeholder). 
+Report will be hosted at [https://github.com/skyetim/citywide_mobility_survey](https://github.com/skyetim/citywide_mobility_survey). 
 
 ## TODO
 
