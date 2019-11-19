@@ -1,0 +1,14 @@
+---
+title: "Analysis of Citywide Mobility Survey" 
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+github-repo: skyetim/citywide_mobility_survey
+description: "This book holds the EDAV final project for Group 3, Fall 2019, Columbia University"
+---
+
+# (PART) Introduction {-}
+
+# Introduction
+

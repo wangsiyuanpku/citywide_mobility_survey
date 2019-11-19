@@ -1,0 +1,7 @@
+book_filename: "citywide_mobility_survey"
+language:
+  ui:
+    chapter_name: "Chapter "
+delete_merged_file: true
+before_chapter_script: "_common.R"
+rmd_files: ['index.Rmd', 'Pset5-A.Rmd']
