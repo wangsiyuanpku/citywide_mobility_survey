@@ -4,5 +4,6 @@ Title: Citywide Mobility Survey
 Version: 0.0.1
 URL: https://github.com/skyetim/citywide_mobility_survey/
 Imports:
-  tidyverse
+  tidyverse,
+  bookdown
 
