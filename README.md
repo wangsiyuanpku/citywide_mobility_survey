@@ -8,7 +8,7 @@ Report will be hosted at [https://skyetim.github.io/citywide_mobility_survey/](h
 - [x] Setup bookdown
 - [x] Setup travis
 - [x] Fill team information
-- [ ] How to divide up work
+- [x] How to divide up work
 - [x] Research Questions
 - [x] Output format
 - [x] Data Source

@@ -1,7 +1,4 @@
 # Pset 5
-```{r, include=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = TRUE)
-```
 
 This assignment is designed to help you get started on the final project. Be sure to review the final project instructions (https://edav.info/project.html), in particular the new section on reproducible workflow (https://edav.info/project.html#reproducible-workflow), which summarizes principles that we've discussed in class.
     
@@ -11,13 +8,14 @@ This assignment is designed to help you get started on the final project. Be sur
 
 a) Who's on the team? (Include names and UNIs)
 
-1. Tian Wang, tw2736
-2. Chao Huang, ch3474
-3. Siyuan Wang, sw3418
-4. Boyu Liu, bl2791
+  1. Tian Wang, tw2736
+  2. Chao Huang, ch3474
+  3. Siyuan Wang, sw3418
+  4. Boyu Liu, bl2791
 
 
 b) How do you plan to divide up the work? (Grading is on a group basis. The point of asking is to encourage you to think about this.)
+As we have several questions we are curious about, each of the team member will be responsible for exploring one question. 
 
 
 ## The Questions
@@ -45,7 +43,7 @@ What is your data source?  What is your method for importing data? Please be spe
 
 [5 points]
 
-  * We plan to analyze "Citywide Mobility Survey - Main Survey" dataset, the source of which is US Department of Transportation.
+  * We plan to analyze "Citywide Mobility Survey - Main Survey" dataset, the source of which is NYC Department of Transportation. Full dataset and description can be downloaded [here](https://www1.nyc.gov/html/dot/html/about/citywide-mobility-survey.shtml). 
 
   * We download the dataset from the website and use read.csv() to import data.
   

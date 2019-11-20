@@ -1,5 +1,6 @@
 ---
 title: "Analysis of Citywide Mobility Survey" 
+author: Tian Wang, Chao Huang, Siyuan Wang, Boyu Liu
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
@@ -11,4 +12,3 @@ description: "This book holds the EDAV final project for Group 3, Fall 2019, Col
 # (PART) Introduction {-}
 
 # Introduction
-
