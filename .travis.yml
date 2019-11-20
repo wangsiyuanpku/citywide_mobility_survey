@@ -13,7 +13,8 @@ deploy:
   provider: pages
   local_dir: _book
   skip_cleanup: true
-  github-token: "$GITHUB_TOKEN"
+  verbose: true
+  github-token: $GITHUB_PAT
   on:
     branch: master
 env:
