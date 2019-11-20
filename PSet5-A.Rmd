@@ -10,7 +10,11 @@ This assignment is designed to help you get started on the final project. Be sur
 [2 points]
 
 a) Who's on the team? (Include names and UNIs)
+
 1. Tian Wang, tw2736
+2. Chao Huang, ch3474
+3. Siyuan Wang, sw3418
+4. Boyu Liu, bl2791
 
 
 b) How do you plan to divide up the work? (Grading is on a group basis. The point of asking is to encourage you to think about this.)
@@ -22,11 +26,12 @@ b) How do you plan to divide up the work? (Grading is on a group basis. The poin
 
 List three questions that you hope you will be able to answer from your research.
 
-a)
+a) What are the factors and experiences that drive transportation choices for New York City residents?
 
-b)
+b) What's the transportation preference and usage pattern within each borough? 
 
-c)
+c) What's relationship between transportation preference and air quality?
+
 
 ## Which output format do you plan to use to submit the project? 
 
@@ -40,6 +45,11 @@ What is your data source?  What is your method for importing data? Please be spe
 
 [5 points]
 
+  * We plan to analyze "Citywide Mobility Survey - Main Survey" dataset, the source of which is US Department of Transportation.
+
+  * We download the dataset from the website and use read.csv() to import data.
+  
+  * Obstacles: How to deal with sampling weights? This dataset has a column of sampling weight, which can be used to correct for imperfections (e.g. the selection of units with unequal probabilities, non-coverage of the population) in the sample that might lead to bias and other departures between the sample and the population. At the beginning, we're confused about how to take these weights into account when analyzing categorical variable. But after careful consideration, we plan to multiply each observation with the corresponding sampling weight and then do the subsequent exploratory data visualization.
 
 
 ### Provide a short summary, including 2-3 graphs, of your initial investigations. 
