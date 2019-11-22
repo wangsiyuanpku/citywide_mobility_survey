@@ -27,7 +27,7 @@ List three questions that you hope you will be able to answer from your research
 
 a) What are the factors and experiences that drive transportation choices for New York City residents?
 
-b) What's the transportation preference and usage pattern within each borough? 
+b) What's the transportation preference and usage pattern at the overal city level? 
 
 c) What's relationship between transportation preference and air quality?
 
@@ -134,7 +134,7 @@ ggplot(subset1, aes(order, weighted)) +
 
 2. We explored the relationship between gender and choices for modes of transportation. Here we cannot use mosaic plot, since the question for modes of transportation allows multiple choices. So we can only focus on the number of respondents choosing each answers.
 
-From the following Cleverland dot plot, we can see that both females and males prefer going out by subway, we can further analyze the reasons for that choice. Less of them will use train and ferry to get around the city. The overall preferences of females and males for modes of transportation are roughly the same, except that most of females also prefer taking bus and walking.
+From the following Cleverland dot plot, we can see that both females and males prefer going out by subway. Less of them will use train and ferry to get around the city. The overall preferences of females and males for modes of transportation are roughly the same, except that most of females also prefer taking bus and walking.
 
 ```{r}
 # Age & Travel habits
@@ -217,14 +217,15 @@ df1 <- df1 %>%
   ungroup()
 
 ggplot(df1, aes(x = weighted, y = reorder(Transportation, weighted), color = Gender)) +
-  geom_point(size = 1) +
+  geom_point(size = 1.5) +
   labs(title = "Modes of Transportation Using to Get Around The City",
        caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9", 
        x = "Count", y = "Modes of Transportation") + 
-  scale_color_manual(labels = c("Male", "Female"), values = c("cyan2", "sienna3"))
+  scale_color_manual(labels = c("Male", "Female"), values = c("cyan2", "sienna3"))+
+  theme_bw(11)
 ```
 
-Next step, we will mainly focus on multivariable analysis, trying to figure out the factors and experiences that drive transportation choices for New York City residents. Also, we will analyze the transportation preference of New York City residents and the usage pattern at the overall city level.
+We further analyzed the reasons for choosing walking, subway and bus to get around the city. Not surprisingly, the common causes for these choices are that they are inexpensive and convenient. Generally, walking and taking bus would take a long time to get to a place and subway is a little uncomfortable. However, the majority of responsdents, especially females, still prefer taking subway, bus and walking to get around the city, indicating that they are more concerned about the price and level of convenience.
 
 ```{r}
 rawfile <- read.csv("data/raw_survey_data.csv")
@@ -250,6 +251,7 @@ ggplot(df_walk_group, aes(reorder(variable,-prop),prop))+
   ggtitle("Why do People Choose Walking in New York City?") +
   xlab("Reasons") +
   ylab("Proportion") +
+  labs(caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   geom_text(aes(label=format(round(prop, 2), nsmall = 2)),vjust=-0.1)+
   theme_economist()+
   theme(axis.text.x = element_text(size = 8))
@@ -270,6 +272,7 @@ ggplot(df_subway_group, aes(reorder(variable,-prop),prop))+
   xlab("Reasons") +
   ylab("Proportion") +
   geom_text(aes(label=format(round(prop, 2), nsmall = 2)),vjust=-0.1)+
+  labs(caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_economist()+
   theme(axis.text.x = element_text(size = 8))
 ```
@@ -289,6 +292,9 @@ ggplot(df_bus_group, aes(reorder(variable,-prop),prop))+
   xlab("Reasons") +
   ylab("Proportion") +
   geom_text(aes(label=format(round(prop, 2), nsmall = 2)),vjust=-0.1)+
+  labs(caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_economist()+
   theme(axis.text.x = element_text(size = 8))
 ```
+
+Next step, we will mainly focus on multivariable analysis, trying to figure out the factors and experiences that drive transportation choices for New York City residents. Also, we will analyze the transportation preference of New York City residents and the usage pattern at the overall city level.
