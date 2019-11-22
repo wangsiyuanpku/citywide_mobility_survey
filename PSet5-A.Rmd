@@ -55,4 +55,79 @@ What is your data source?  What is your method for importing data? Please be spe
 
 [10 points]
 
+This survey conducted among New York City Residents in two ways, over phone and online. Both of them have sample size 1800. The survey conducted over phone reached more general New York population and the survey conducted online targeted the population in certain neighborhoods that are difficult to reach by phone, not representative of New York City at the overall city level. So we will use different sub datasets to analyze what we are concerned about on the overall city level and the survey zone level. 
 
+Another important thing we have mentioned in the Obstacles part is that we need to take survey weights into consideration when we analyze the dataset. The weights are given by US Department of Transportation, which were calculated based on age, gender, ethnicity, educational attainment and geography.
+
+In this stage,
+
+1. We explored some basic information of the phone survey respondents, including age, gender, race, education and income. In these features, age is continuous data and the others are categorical data, so we visualized them using histogram and bar chart, respectively.
+
+Remarks:
+
+For Gender, *1 = Male, 2 = Female*. 
+
+For Race, *1 = White/Caucasian, 2 = Black/ African American/ Caribbean American, 3 = Asian, 4 = American Indian or Alaska Native, 5 = Native Hawaiian or Pacific Islander, 6 = Other, 7 = Two or more races, 8 = Don't know, 9 = Refused*.
+
+For Education, *1 = No high school, 2 = Some high school, 3 = High school graduate or equivalent (i.e., GED), 4 = Some college but degree not received or in progress, 5 = Associate degree (i.e., AA, AS), 6 = Bachelor’s degree (i.e., BA, BS, AB), 7 = Graduate degree (i.e., Master’s, Professional, Doctorate), 8 = Don’t know, 9 = Refused*.
+
+For Income, *1 = Less than \$14,999, 2 = \$15,000 - \$24,999, 3 = \$25,000 - \$34,999, 4 = \$35,000 - \$49,999, 5 = \$50,000 - \$74,999, 6 = \$75,000 - \$99,999, 7 = \$100,000 - \$149,999, 8 = \$150,000 - \$199,999, 9 = $200,000 and above, 10 = Don’t know, 11 = Refused*.
+ 
+Results Summary:
+
+  * Age: Age is bimodel distributed and its two modes are around 30 and 50. Its range is [18, 99]. 
+  
+  * Gender: Female and male respondents are about 56.20% and 43.80% of the total.
+  
+  * Race: The majority of phone respondents are White or Caucasian, followed by Black/ African American/ Caribbean American. American Indian or Alaska Native and Native Hawaiian or Pacific Islander are the least.
+  
+  * Income: Most respondents have total annual household income \$50,000 - \$74,999 and least respondents have total annual household income \$200,000 and above. We can imagine the distribution of annual income, which would be right-skewed.
+  
+  * Education: The majority of respondents have at least high school education. 
+
+```{r}
+library(tidyverse)
+
+# Import the raw dataset.
+raw_data <- read.csv("data/raw_survey_data.csv") %>%
+  # Filter out the observations obtained via online survey.
+  filter(Job == 1 & qgender %in% c(1, 2))  
+raw_data1 <- raw_data[,-c(1:5)]  # Remove the columns we do not need.
+cols <- c(3, 5, 9, 10)
+raw_data1[c(3, 5, 9, 10)] <- lapply(raw_data1[cols], factor)
+
+# Select columns containing basic information of respondents.
+subset1 <- subset(raw_data1, select = c(3, 5, 9, 10, 445))
+colnames(subset1) <- c("Gender", "Race", "Education", "Income", "weight")
+
+# Plot the distribution of respondents' age.
+raw_data1 %>%
+  filter(qage != 999) %>%
+  ggplot(aes(qage, weight = allwt)) + 
+  geom_histogram(bins = 20) +
+  labs(x = "Age", title = "The Distribution of Respondents' Age", 
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_bw()
+
+# Tidy data and reorder the factors.
+subset1 <- subset1 %>%
+  gather(key = "Info", value = "group", -weight)
+
+subset1 <- subset1 %>%
+  group_by(Info, group) %>%
+  summarise(weighted = sum(weight)) %>%
+  ungroup() %>%
+  arrange(Info, weighted) %>%
+  mutate(order = row_number())
+
+# Visualize other basic information.
+ggplot(subset1, aes(order, weighted)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  facet_wrap(. ~ Info, scales = "free") +
+  scale_x_continuous(breaks = subset1$order,
+                     labels = subset1$group) +
+  ggtitle("Basic Information of Phone Respondents") +
+  xlab("Group") +
+  ylab("Count") +
+  theme_bw(11)
+```
