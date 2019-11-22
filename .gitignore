@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 *.RProj
+*.Rproj
 _book/
 _bookdown_files/
