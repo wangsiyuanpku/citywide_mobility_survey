@@ -27,7 +27,7 @@ List three questions that you hope you will be able to answer from your research
 
 a) What are the factors and experiences that drive transportation choices for New York City residents?
 
-b) What's the transportation preference and usage pattern within each borough? 
+b) What's the transportation preference and usage pattern at the overal city level? 
 
 c) What's relationship between transportation preference and air quality?
 
@@ -134,7 +134,7 @@ ggplot(subset1, aes(order, weighted)) +
 
 2. We explored the relationship between gender and choices for modes of transportation. Here we cannot use mosaic plot, since the question for modes of transportation allows multiple choices. So we can only focus on the number of respondents choosing each answers.
 
-From the following Cleverland dot plot, we can see that both females and males prefer going out by subway, we can further analyze the reasons for that choice. Less of them will use train and ferry to get around the city. The overall preferences of females and males for modes of transportation are roughly the same, except that most of females also prefer taking bus and walking.
+From the following Cleverland dot plot, we can see that both females and males prefer going out by subway. Less of them will use train and ferry to get around the city. The overall preferences of females and males for modes of transportation are roughly the same, except that most of females also prefer taking bus and walking.
 
 ```{r}
 # Age & Travel habits
@@ -217,11 +217,84 @@ df1 <- df1 %>%
   ungroup()
 
 ggplot(df1, aes(x = weighted, y = reorder(Transportation, weighted), color = Gender)) +
-  geom_point(size = 1) +
+  geom_point(size = 1.5) +
   labs(title = "Modes of Transportation Using to Get Around The City",
        caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9", 
        x = "Count", y = "Modes of Transportation") + 
-  scale_color_manual(labels = c("Male", "Female"), values = c("cyan2", "sienna3"))
+  scale_color_manual(labels = c("Male", "Female"), values = c("cyan2", "sienna3"))+
+  theme_bw(11)
+```
+
+We further analyzed the reasons for choosing walking, subway and bus to get around the city. Not surprisingly, the common causes for these choices are that they are inexpensive and convenient. Generally, walking and taking bus would take a long time to get to a place and subway is a little uncomfortable. However, the majority of responsdents, especially females, still prefer taking subway, bus and walking to get around the city, indicating that they are more concerned about the price and level of convenience.
+
+```{r}
+rawfile <- read.csv("data/raw_survey_data.csv")
+df_reason <- rawfile %>% select(c(2,200:454))%>%
+  select(c(1,61:116,252))%>%
+  na.omit()
+
+names(df_reason)[2:58] <- c("Walking Convenient","Walking Reliable","Walking Fast","Walking Inexpensive","Walking Safe","Walking Comfortable","Walking Don't know","Walking Refused","Subway Convenient","Subway Reliable","Subway Fast", "Subway Inexpensive","Subway Safe","Subway Comfortable","Subway Don't know","Subway Refused","Bus Convenient","Bus Reliable","Bus Fast","Bus Inexpensive","Bus Safe","Bus Comfortable","Bus Don't know","Bus Refused","Cars Convenient","Cars Reliable","Cars Fast","Cars Inexpensive","Cars Safe","Cars Comfortable","Cars Don't know","Cars Refused","Taxis  Convenient","Taxis  Reliable","Taxis  Fast","Taxis  Inexpensive","Taxis  Safe","Taxis  Comfortable","Taxis  Don't know","Taxis  Refused","Ride-hail services Convenient","Ride-hail services Reliable","Ride-hail services Fast","Ride-hail services Inexpensive","Ride-hail services Safe","Ride-hail services Comfortable","Ride-hail services Don't know","Ride-hail services Refused","Bicycling Convenient","Bicycling Reliable","Bicycling Fast","Bicycling Inexpensive","Bicycling Safe","Bicycling Comfortable","Bicycling Don't know","Bicycling Refused","weight")
+```
+```{r}
+library(ggthemes)
+df_walk <- df_reason[c(1:9,58)]
+names(df_walk)[c(2:9)] <- c("Convenient","Reliable","Fast","Inexpensive","Safe","Comfortable","Don't Know" , "Refused")
+df_walk <- df_walk %>% gather(key = variable, value, -c(weight,UniqueID))
+df_walk['value_weighted'] <- df_walk['value'] * df_walk['weight']
+df_walk_group <- df_walk %>% 
+  group_by(variable)%>%
+  summarise(response = sum(value_weighted), total = sum(weight))%>%
+  mutate(prop = response/total)
+
+ggplot(df_walk_group, aes(reorder(variable,-prop),prop))+
+  geom_col()+
+  ggtitle("Why do People Choose Walking in New York City?") +
+  xlab("Reasons") +
+  ylab("Proportion") +
+  labs(caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  geom_text(aes(label=format(round(prop, 2), nsmall = 2)),vjust=-0.1)+
+  theme_economist()+
+  theme(axis.text.x = element_text(size = 8))
+```
+```{r}
+df_subway <- df_reason[c(1,10:17,58)]
+names(df_subway)[c(2:9)] <- c("Convenient","Reliable","Fast","Inexpensive","Safe","Comfortable","Don't Know" , "Refused")
+df_subway <- df_subway %>% gather(key = variable, value, -c(weight,UniqueID))
+df_subway['value_weighted'] <- df_subway['value'] * df_subway['weight']
+df_subway_group <- df_subway %>% 
+  group_by(variable)%>%
+  summarise(response = sum(value_weighted), total = sum(weight))%>%
+  mutate(prop = response/total)
+
+ggplot(df_subway_group, aes(reorder(variable,-prop),prop))+
+  geom_col()+
+  ggtitle("Why do People Take Subway in New York City?") +
+  xlab("Reasons") +
+  ylab("Proportion") +
+  geom_text(aes(label=format(round(prop, 2), nsmall = 2)),vjust=-0.1)+
+  labs(caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist()+
+  theme(axis.text.x = element_text(size = 8))
+```
+```{r}
+df_bus <- df_reason[c(1,18:25,58)]
+names(df_bus)[c(2:9)] <- c("Convenient","Reliable","Fast","Inexpensive","Safe","Comfortable","Don't Know" , "Refused")
+df_bus <- df_bus %>% gather(key = variable, value, -c(weight,UniqueID))
+df_bus['value_weighted'] <- df_bus['value'] * df_bus['weight']
+df_bus_group <- df_bus %>% 
+  group_by(variable)%>%
+  summarise(response = sum(value_weighted), total = sum(weight))%>%
+  mutate(prop = response/total)
+
+ggplot(df_bus_group, aes(reorder(variable,-prop),prop))+
+  geom_col()+
+  ggtitle("Why do People Choose Taking Bus in New York City?") +
+  xlab("Reasons") +
+  ylab("Proportion") +
+  geom_text(aes(label=format(round(prop, 2), nsmall = 2)),vjust=-0.1)+
+  labs(caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist()+
+  theme(axis.text.x = element_text(size = 8))
 ```
 
 Next step, we will mainly focus on multivariable analysis, trying to figure out the factors and experiences that drive transportation choices for New York City residents. Also, we will analyze the transportation preference of New York City residents and the usage pattern at the overall city level.
