@@ -1,0 +1,454 @@
+---
+title: "clean_data"
+author: "Chao Huang"
+date: "11/21/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+ # keep this chunk in your .Rmd file
+ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## data cleaning
+
+```{r cars}
+library(openxlsx)
+library(dplyr)
+library(tidyverse)
+```
+
+## Read data
+
+```{r}
+survey <- read.csv("./data/raw_survey_data.csv")
+df_list <- list()
+```
+
+## Useful functions
+
+```{r}
+one_hot_to_factor <- function (filtered_df, 
+                               encoding_dict,
+                               new_name,
+                               include_other=F) {
+  subset <- filtered_df %>% 
+  unite("collected", -UniqueID) %>% 
+  mutate(list_view=str_split(collected, "_")) %>% 
+  mutate(true_false=map(list_view, function(x) ifelse(x == "1", TRUE, FALSE)))
+
+  result <- map(subset$true_false, function(x) as.vector(encoding_dict[x]))
+  subset %>% mutate(result=result) %>% select(UniqueID, !!new_name := result)
+}
+```
+
+```{r}
+parse_column_description <- function (prefix) {
+  column_info <- read.xlsx("./data/Data Dictionary.xlsx", sheet = "Column Info")
+  description <- column_info$X2
+  found_cols <- unlist(Filter(function (x) {startsWith(x, prefix)}, description))
+  prefix_len <- str_length(prefix)
+  trimmed_cols <- str_trim(substring(found_cols, first = prefix_len + 1), side = "both")
+  trimmed_cols <- str_replace_all(trimmed_cols, "[?]", "")
+  unlist(Filter(function (x) ! str_detect(tolower(x), tolower("Free text")), trimmed_cols))
+}
+```
+
+```{r}
+index_mapping <- function () {
+  
+}
+```
+
+## Demographic columns: 3~68
+
+```{r}
+survey_dmg <- survey %>% select(Job:qSurveyZone)
+df_list[["dmg"]] <- survey_dmg
+```
+
+## Borough: 69 ~ 78
+
+```{r}
+borough_dict <- parse_column_description("Does the respondent live in")
+survey_borough <- one_hot_to_factor(survey %>% select(c(UniqueID, starts_with("qborough"))), 
+                                    borough_dict, 
+                                    "borough")
+df_list[["borough"]] <- survey_borough
+```
+
+## Travel Code (Which of the following modes of transportation do you use to get around the city?): 79 ~ 130
+
+```{r}
+travel_code_dict <- parse_column_description("Which of the following modes of transportation do you use to get around the city?")
+survey_travel_code <- survey %>% select(c(UniqueID, starts_with("qusetravelcode")))
+survey_travel_code <- one_hot_to_factor(survey_travel_code,
+                                        travel_code_dict, 
+                                        "travel_code")
+df_list[["travel_code"]] <- survey_travel_code
+```
+
+## Car info: 131 ~ 147
+
+```{r}
+survey_car_info <- survey %>% select(c(UniqueID, qlicense:qcarchange))
+df_list[["car_info"]] <- survey_car_info
+```
+
+## Car number decrease/increase and reasons: 148 ~ 231
+
+```{r}
+survey_car_num_change <- survey %>% select(c(UniqueID, starts_with("gCAR")))
+df_list[["car_num_change"]] <- survey_car_num_change
+```
+
+## Car park: 232 ~ 248
+
+```{r}
+park_dict = parse_column_description("Where do you typically park each vehicle?")
+survey_car_park <- survey %>% select(c(UniqueID, matches("qcarpark\\d+")))
+survey_car_park <- one_hot_to_factor(survey_car_park, park_dict, "parking_places")
+df_list[["survey_car_park"]] <- survey_car_park
+```
+
+## Car pay amount and miles: 249 ~ 261
+
+```{r}
+survey_car_price <- survey %>% select(c(UniqueID, qcarparkpay, qcarparkpay_month, qcarmiles))
+df_list[["car_price"]] <- survey_car_price
+```
+
+## Car share services: 262 ~ 278
+
+```{r}
+survey_qshare <- survey %>% select(c(UniqueID, matches("qshare\\d+")))
+share_dict <- parse_column_description("Which of the following car sharing services, if any, are you a member of?")
+survey_qshare <- one_hot_to_factor(survey_qshare, share_dict, "share_services")
+df_list[["share"]] <- survey_qshare
+```
+
+## Car share years and freqs: 279 ~ 293
+
+```{r}
+survey_share_time <- survey %>% select(c(UniqueID, qsharemember, qsharefreq))
+df_list[["share_time"]] <- survey_share_time
+```
+
+## Car share purpose: 294 ~ 316
+
+```{r}
+survey_share_purp <- survey %>% select(c(UniqueID, starts_with("qsharepurpose")))
+
+share_purp_dict <-  parse_column_description("When using a car sharing service, what are the three most common purposes of your trips?")
+
+survey_share_purp <- one_hot_to_factor(survey_share_purp, share_purp_dict, "use_share_purpose")
+
+df_list[["share_purp"]] <- survey_share_purp
+```
+
+## Methods prior zipcar: 317 ~ 335
+
+```{r}
+survey_prior_zip <- survey %>% select(c(UniqueID, starts_with("qziptravel")))
+
+prior_zip_dict <- parse_column_description("How did you make those trips prior to becoming a member at Zipcar or Enterprise?")
+
+survey_prior_zip <- one_hot_to_factor(survey_prior_zip, prior_zip_dict, "Methods prior zipcar")
+
+df_list[["prior_zip"]] <- survey_prior_zip
+```
+
+## Methods prior ReachNow: 336 ~ 354
+
+```{r}
+survey_prior_reach <- survey %>% select(c(UniqueID, starts_with("qreachtravel")))
+
+prior_reach_dict <- parse_column_description("How did you make those trips prior to becoming a member at Car2go or ReachNow?")
+
+survey_prior_reach <- one_hot_to_factor(survey_prior_reach, prior_reach_dict, "Methods prior Reach")
+
+df_list[["prior_reach"]] <- survey_prior_reach
+```
+
+## Methods prior Share car services (combined reach and zip): 355 ~ 406
+
+```{r}
+prior_share_dict <- parse_column_description("If member of a carshare company (combined Zipcar/Enterprise and car2go/ReachNow), how did you make trips prior to membership?")
+
+survey_prior_share <- survey %>% select(c(UniqueID, matches("qsharetravelcode\\d+")))
+survey_prior_share <- one_hot_to_factor(survey_prior_share, prior_share_dict, "Method prior sharing services")
+
+df_list[["prior_share"]] <- survey_prior_share
+```
+
+## Ride-hailing apps: 407 ~ 422
+
+```{r}
+ride_hail_dict <-  c("Uber", "Lyft", "Via", "Gett", "Juno", "None of the above", "Don't know", "Refused")
+survey_ride_hail <- survey %>% select(c(UniqueID, matches("qridehail\\d+")))
+survey_ride_hail <- one_hot_to_factor(survey_ride_hail, ride_hail_dict, "Ride Hail Services")
+
+df_list[["ride_hail"]] <- survey_ride_hail
+```
+
+
+## Ride-hailing frequency: 423 ~ 430
+
+```{r}
+survey_ride_hail_freq <- survey %>% select(c(UniqueID, qridehail_freq))
+
+df_list[["ride_hail_freq"]] <- survey_ride_hail_freq
+```
+
+## Ride hail purpose: 431 ~ 453
+
+```{r}
+ride_hail_purp_dict <- parse_column_description("When using ride-hailing apps, what are the three most common purposes of your trips?")
+
+survey_ride_hail_purp <- survey %>% select(c(UniqueID, starts_with("qridehailpurpose")))
+survey_ride_hail_purp <- one_hot_to_factor(survey_ride_hail_purp, ride_hail_purp_dict, "Purpose of using ride hailing app")
+
+df_list[["ride_hail_purp"]] <- survey_ride_hail_purp
+```
+
+## Prior to Ride hail: 454 ~ 501
+
+```{r}
+pre_ride_hail_dict <- parse_column_description("Before you began using ride-hailing services, how did you typically make those trips?")
+
+survey_pre_ride_hail <- survey %>% select(c(UniqueID, starts_with("qpreridehail")))
+
+survey_pre_ride_hail <- one_hot_to_factor(survey_pre_ride_hail, pre_ride_hail_dict, "Prior to Riding Hail")
+
+df_list[["pre_ride_hail"]] <- survey_pre_ride_hail
+```
+
+## Trip Planning App: 502 ~ 516
+
+```{r}
+trip_planning_dict = parse_column_description("Which of the following trip planning apps, if any, do you use at least once a week?")
+survey_trip_planning <- survey %>% select(c(UniqueID, starts_with("qtripplanning")))
+survey_trip_planning <- one_hot_to_factor(survey_trip_planning, trip_planning_dict, "Trip Planning App")
+df_list[["trip_planning"]] <- survey_trip_planning
+```
+
+## Own bike: 517 ~ 520
+```{r}
+survey_bikeown <- survey %>% select(c(UniqueID, qbikeown, qbikemany))
+df_list[["bike_own"]] <- survey_bikeown
+```
+
+## Bike type: 522 ~ 532
+```{r}
+bike_type_dict <- parse_column_description("What types of bicycle(s) do you or your household members own?")
+
+survey_bike_type <- survey %>% select(c(UniqueID, matches("qbiketype\\d+")))
+survey_bike_type <- one_hot_to_factor(survey_bike_type, bike_type_dict, "Bike Type")
+df_list[["bike_type"]] <- survey_bike_type
+```
+
+## Bike store: 533 ~ 550
+```{r}
+bike_store_dict <- parse_column_description("Where do you or the members of your household store your bicycle(s)?")
+
+survey_bike_store <- survey %>% select(c(UniqueID, matches("qbikestore\\d+")))
+survey_bike_store <- one_hot_to_factor(survey_bike_store, bike_store_dict, "Bike Store")
+df_list[["bike_store"]] <- survey_bike_store
+```
+
+## Bike Ride: 552 ~ 576
+
+```{r}
+survey_bike_ride_freq <- survey %>% select(c(UniqueID, qbikeride, qbiketo, qbikedays, qcitibike, qcitibikefreq))
+df_list[["bike_ride_freq"]] <- survey_bike_ride_freq
+```
+
+## No Citibike Reason: 577 ~ 595
+```{r}
+survey_no_citibike <- survey %>% select(c(UniqueID, matches("qnocitibike\\d+")))
+
+no_citibike_dict <- parse_column_description("Why don’t you use Citi Bike?")
+
+df_list[["no_citibike_reason"]] <- one_hot_to_factor(survey_no_citibike, no_citibike_dict, "No Citibike Reason")
+```
+
+## Benefits: 596 ~ 624
+```{r}
+survey_benefits <- survey %>% select(c(UniqueID, matches("qbenefits\\d+")))
+
+benefits_dict <- parse_column_description("Does your employer provide any of the following commuter benefits as part of your compensation?")
+
+df_list[["benefits"]] <- one_hot_to_factor(survey_benefits, benefits_dict, "Benefits")
+```
+
+## Deliveries Freq: 625 ~ 656
+```{r}
+survey_deliveries <- survey %>% select(c(UniqueID, starts_with("gfreight")))
+
+df_list[["delivery_freq"]] <- survey_deliveries
+```
+
+
+## Safety 657 ~ 694
+
+```{r}
+survey_safety <- survey %>% select(c(UniqueID, matches("qsafety\\d")))
+
+df_list[["safety"]] <- survey_safety
+```
+
+## Transportation mode description: 695 ~ 806
+```{r}
+survey_description <- survey %>% select(c(UniqueID, starts_with("gfocusaa1")))
+
+description_dict <- parse_column_description("Which of the following words most apply to this mode of transportation?")
+
+df_list[["description"]] <- one_hot_to_factor(survey_description, description_dict, "Description") 
+```
+
+## Improvement: 807 ~ 841
+```{r}
+survey_improvement <- survey %>% select(c(UniqueID, starts_with("gimprove")))
+
+df_list[["improvement"]] <- survey_improvement
+```
+
+
+## Nationality: 842 ~ 844
+```{r}
+df_list[["Nationality"]] <- survey %>% select(c(UniqueID, QNationOE, QLanguageOE, QLanguage2OE ))
+```
+
+## Marriage: 845 ~ 851
+```{r}
+df_list[["marriage"]] <- survey %>% select(c(UniqueID, qmarried))
+```
+
+## Smartphone: 852 ~ 855
+
+```{r}
+df_list[["smartphone"]] <- survey %>% select(c(UniqueID, qsmartphone))
+```
+
+## Welfare: 856 ~ 865
+```{r}
+survey_welfare <- survey %>% select(c(UniqueID, starts_with("qwelfare")))
+
+welfare_dict <- parse_column_description("Do any of the following describe you?")
+
+df_list[["welfare"]] <- one_hot_to_factor(survey_welfare, welfare_dict, "Welfare")
+```
+
+## Disability: 866 ~ 881
+```{r}
+survey_disability <- survey %>% select(c(UniqueID, starts_with("qdisability")))
+
+disability_dict <- parse_column_description("Do any of the following describe you?")
+
+df_list[["disability"]] <- one_hot_to_factor(survey_disability, disability_dict, "Disability")
+```
+
+
+## Caring: 882 ~ 905
+```{r}
+df_list[["caring"]] <- survey %>% select(c(UniqueID, qcaretaker, qcare))
+```
+
+## Building and living: 893 ~ 938
+
+```{r}
+df_list[["living"]] <- survey %>% select(c(UniqueID, qbuilding, qrent, qnyc, qchildren, qchildrenenroll, starts_with("qchildrenschoolzip"), qCHILDSCHOOLSAME))
+```
+
+## Children School transit to: 939 ~ 952 
+```{r}
+survey_school_transit_to <- survey %>% select(c(UniqueID, matches("qschooltransitto\\d+")))
+
+school_transit_to_dict <- parse_column_description("If your children took transit to school or daycare, how did they get to transit?")
+
+df_list[["school_transit_to"]] <- one_hot_to_factor(survey_school_transit_to, school_transit_to_dict, "School Transit To") 
+```
+
+## Children School Transit From: 954 ~ 968
+```{r}
+survey_school_transit_from <- survey %>% select(c(UniqueID, matches("qschooltransitfrom\\d+")))
+
+school_transit_from_dict <- parse_column_description("If your children took transit from school or daycare, how did they get from transit?")
+
+df_list[["school_transit_from"]] <- one_hot_to_factor(survey_school_transit_from, school_transit_from_dict, "School Transit From")
+```
+
+## School Travel Code: 969 ~ 1022
+```{r}
+survey_school_travel <- survey %>% select(c(UniqueID, matches("qschooltravelcode\\d+")))
+
+school_travel_dict <- parse_column_description("Which of the following modes of transportation do your children use to get to school or daycare each day?")
+
+df_list[["school_travel_code"]] <- one_hot_to_factor(survey_school_travel, school_travel_dict, "School Travel Code")
+```
+
+## Employment: 1023 ~ 1089
+```{r}
+df_list[["Employment"]] <- survey %>% select(c(UniqueID, qemployment, gFULLTIME_qFULLTIME_mA, gFULLTIME_QPARTTIME_mA, starts_with("qzipwork"), starts_with("qtimework"), starts_with("qtimehome"), qindustry, qschool, qlevelschool, qzipschool))
+```
+
+## Work Place: 1090 ~ 1109
+
+```{r}
+survey_work_place <- survey %>% select(c(UniqueID, starts_with("qwpsurveyzone")))
+
+work_place_dict <- parse_column_description("Where is your workplace?")
+
+df_list[["Work Place"]] <- one_hot_to_factor(survey_work_place, work_place_dict, "Work Place")
+```
+
+## Number of trips: 1110 ~ 1115
+
+```{r}
+df_list[["number_of_trips"]] <- survey %>% select(c(UniqueID, qNumber_of_trips_taken:Weekday_Number_of_Trips))
+```
+
+
+## Age: 1116 ~ 1129
+```{r}
+survey_age <- survey %>% select(c(UniqueID, starts_with("Qagecode_final")))
+
+age_dict <- parse_column_description("What is your age?")
+
+df_list[["age"]] <- one_hot_to_factor(survey_age, age_dict, "Age")
+```
+
+## Trip day: 1130 ~ 1142
+```{r}
+df_list[["trip_of_day"]] <- survey %>% select(c(UniqueID, qday1:qPRECIPITATION_append))
+```
+
+## age-gender code and weight: 1143 ~ end
+```{r}
+df_list[["weight"]] <- survey %>% select(c(UniqueID, qAGEGENDER:BOROUGHWt))
+```
+
+
+## Write final dataframe
+
+```{r}
+tidy_survey <- survey %>% select(UniqueID)
+
+for (df in df_list) {
+  columns_name <- colnames(df)
+  if (!(("UniqueID" %in% columns_name) & (length(columns_name) >= 2))) 
+    stop(c("Wrong df: ", length(columns_name), "\n", paste(columns_name, "|")))
+  tidy_survey <- left_join(tidy_survey, df, by = "UniqueID")
+}
+```
+
+
+```{r}
+save(tidy_survey, file="./data/tidy_survey_data.rda")
+```
+
+## load it if needed, the df is called tidy_survey
+
+```{r}
+load("./data/tidy_survey_data.rda")
+```
