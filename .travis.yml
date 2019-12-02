@@ -9,6 +9,7 @@ repos:
   rforge: http://R-Forge.R-project.org
 script:
 - Rscript -e 'bookdown::render_book("index.Rmd")'
+- cp dashboard/main.js _book/dashboard
 deploy:
   provider: pages
   local_dir: _book
