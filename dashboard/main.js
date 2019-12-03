@@ -43,7 +43,7 @@ function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     return [dimension, quantity]
 }
 
-function createGraphDiv(graphID, divID){
+function createGraphDiv(graphID, divID, chartID){
     let div = d3.select(`#${divID}`)
                 .append('div')
                 // .attr("style", 'margin: 15px')
@@ -52,25 +52,27 @@ function createGraphDiv(graphID, divID){
     div.append("strong")
         .text("test")
         .attr('font-weight', 'bold'); 
+    d3.select(`#${chartID}`)
+    .append('a')
+    .attr('class', 'reset')
+    .style('display', 'none')
+    .text('reset');
     div.append('div')
         .attr('class', 'clearfix');
 }
 
-function createResetButton(chartID){
+function bindResetButton(chartID){
     d3.select(`#${chartID}`)
-    .append('a')
-    .attr('class', 'reset')
-    .attr('href', `javascript:charts['${chartID}'].filterAll();dc.redrawAll();`)
-    .style('display', 'none')
-    .text('reset')
+    .select('a')
+    .attr('href', `javascript:charts['${chartID}'].filterAll();dc.redrawAll();`);
 }
 function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping, divID='filters', resetButton=true){
-    createGraphDiv(pieChartID, divID)
+    createGraphDiv(pieChartID, divID, pieChartID)
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
 
     var pie = dc.pieChart(`#${pieChartID}`);
     if (resetButton){
-        createResetButton(pieChartID);
+        bindResetButton(pieChartID);
     }
     pie
         .width(200)
@@ -86,12 +88,11 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
 }
 
 function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping, divID='filters', resetButton=true, ...barParameters){
-    createGraphDiv(barChartID, divID)
-
+    createGraphDiv(barChartID, divID, barChartID);
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
     var chart = dc.barChart(`#${barChartID}`);
     if (resetButton){
-        createResetButton(barChartID);
+        bindResetButton(barChartID);
     }
     chart
         .width(500)
