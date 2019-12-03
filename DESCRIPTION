@@ -5,6 +5,7 @@ Version: 0.0.1
 URL: https://github.com/skyetim/citywide_mobility_survey/
 Imports:
   tidyverse,
-  ggthemes
+  ggthemes, 
+  parcoords
 Remotes: rstudio/bookdown
 
