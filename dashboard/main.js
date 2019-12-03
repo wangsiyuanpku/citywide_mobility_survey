@@ -1,7 +1,7 @@
 "use strict";
 
 let data_loc = 'https://raw.githubusercontent.com/skyetim/citywide_mobility_survey/master/dashboard/mobility_general.json';
-let debug_mode = true;
+let debug_mode = false;
 
 let charts = {};
 
@@ -43,18 +43,23 @@ function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     return [dimension, quantity]
 }
 
-function createGraphDiv(graphID, divID, chartID, chartTitle=undefined){
+function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength=6, metaDivID='filters'){
+    if (d3.select(`#${divID}`).empty()) {
+        d3.select(`#${metaDivID}`)
+          .append('div')
+          .attr('id', divID)
+          .attr('class', 'row')
+    }
     let div = d3.select(`#${divID}`)
                 .append('div')
                 // .attr("style", 'margin: 15px')
                 .attr("id", graphID)
-                .attr('class', 'dc-chart'); 
+                .attr('class', `dc-chart col-${6}`); 
     div.append("strong")
-        .text(chartTitle || chartID)
-        .attr('font-weight', 'bold'); 
+        .text(chartTitle || chartID);
     d3.select(`#${chartID}`)
     .append('a')
-    .attr('class', 'reset')
+    .attr('class', 'reset float-sm-right')
     .style('display', 'none')
     .text('reset');
     div.append('div')
@@ -77,7 +82,7 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
     pie
         .width(200)
         .height(200)
-        .innerRadius(50)
+        // .innerRadius(50)
         .label(function(d) {
                     return d.key + ': ' + d.value; 
             })
@@ -101,7 +106,7 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         .x(d3.scaleOrdinal())
         .xUnits(dc.units.ordinal)
         .xAxisLabel(dimensionColumn)
-        .yAxisLabel("Count")
+        // .yAxisLabel("Count")
         .elasticY(true)
         .dimension(dimension)
         .group(quantity);
@@ -110,6 +115,6 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
 }
 
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
-    charts['pie1'] = pieChart(cf_data, 'qgender', "pie1", genderMapping);
-    charts['bar1'] = barChart(cf_data, 'qage', 'bar1', ageMapping)
+    charts['pie1'] = pieChart(cf_data, 'qgender', "pie1", genderMapping, 'row0');
+    charts['bar1'] = barChart(cf_data, 'qage', 'bar1', ageMapping, 'row0')
 });
