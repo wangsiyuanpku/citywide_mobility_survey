@@ -8,7 +8,7 @@ load("data/travel_data.rda")  # df_travel
 load("data/mobility_general.rda")  # df_general
 ```
 
-```{r someVar, echo=FALSE}
+```{r, echo=FALSE}
 # Define a function to set the theme of plots
 theme_user <- function(total_size, title_size, subtitle_size) {
   theme_plot <- theme_bw(total_size) +
@@ -35,7 +35,7 @@ theme_user <- function(total_size, title_size, subtitle_size) {
 
 First, we plot a parallel coordinates plot to get an idea of our dataset. The lines are colored by transportation modes. By changing the position of each categorical variable, we can notice that each of the transportation mode are composed of almost all kinds of residents and the difference may be the proportion of each kind of residents in the tranportation mode. So, we will focus on the influence of each feature on the composition of transportation modes in the following analysis.
 
-```{r someVar, echo=FALSE}
+```{r, echo=FALSE}
 travel_mode <- df_travel[c(1, 5:12)]
 traveler <- df_general[c(1:6)]  
 
@@ -62,7 +62,7 @@ total %>%
 
 We plot a stacked bar chart for each feature. First of all, we can see that gender, age and income all have influence on the composition of the transportation modes. More specifically, the majority of the residents who willing to ride a bicycle to get around the city are males, around 18-54 years old, and most of them have an income ranging from \$50,000 to \$149,999. Bus, for-hire vehicle and walk are prefered by female residents. In addition, compared with bicycle, other transportation modes are prefered by a relative high proportion of people over 55 years old. Also, a higher proportion of people whose income is higher than 150,000 love to get around the city using bicycle, car and for-hire vehicle when compared with bus, ferry and subway. The majority of residents that prefer taking train are around 25-64 years old.
 
-```{r someVar, echo=FALSE}
+```{r, echo=FALSE}
 # Transportation mode ~ Gender
 travel_mode <- df_travel[c(1, 4:12)]
 traveler_gender <- df_general[c(1:2)]  
@@ -93,7 +93,7 @@ ggplot(df1, aes(Mode, Count, fill = Gender)) +
 ```
 
 
-```{r someVar, echo=FALSE}
+```{r, echo=FALSE}
 # Transportation mode ~ Age
 traveler_age <- df_general[c(1, 3)]  
 df2 <- merge(travel_mode, traveler_age, by = "UniqueID", all = TRUE) %>%
@@ -123,7 +123,7 @@ ggplot(df2, aes(Mode, Count, fill = Age)) +
 ```
 
 
-```{r someVar, echo=FALSE}
+```{r, echo=FALSE}
 # Transportation mode ~ Income
 traveler_income <- df_general[c(1, 6)] 
 df4 <- merge(travel_mode, traveler_income, by = "UniqueID", all = TRUE) %>%
