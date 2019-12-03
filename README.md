@@ -12,12 +12,20 @@ Report will be hosted at [https://skyetim.github.io/citywide_mobility_survey/](h
 - [x] Research Questions
 - [x] Output format
 - [x] Data Source
-- [ ] Initial Investigation 1: feature exploration - one hot property -> need data cleansing
-- [ ] Initial Investigation 2: feature exploration - missing values
-- [ ] Initial Investigation 3: OPTIONAL
+- [x] Initial Investigation 1: feature exploration - one hot property -> need data cleansing
+- [x] Initial Investigation 2: feature exploration - missing values
+- [x] Initial Investigation 3: OPTIONAL
 
 ### Phase 2
-- [ ] Data cleansing
-- [ ] Feature selection
-- [ ] Analysis structure
+- [x] Data cleansing
+- [x] Feature selection
+- [x] Analysis structure
 
+### Phase 3
+#### Interactive graph
+- [ ] data cleansing and feature selection
+- [x] `reset` button
+- [ ] beautify the page: color
+- [ ] beautify the page: CSS
+- [x] travis setup
+- [ ] embed in bookdown
