@@ -43,14 +43,14 @@ function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     return [dimension, quantity]
 }
 
-function createGraphDiv(graphID, divID, chartID){
+function createGraphDiv(graphID, divID, chartID, chartTitle=undefined){
     let div = d3.select(`#${divID}`)
                 .append('div')
                 // .attr("style", 'margin: 15px')
                 .attr("id", graphID)
                 .attr('class', 'dc-chart'); 
     div.append("strong")
-        .text("test")
+        .text(chartTitle || chartID)
         .attr('font-weight', 'bold'); 
     d3.select(`#${chartID}`)
     .append('a')
