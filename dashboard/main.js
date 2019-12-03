@@ -44,7 +44,16 @@ function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
 }
 
 function createGraphDiv(graphID, divID){
-    d3.select(`#${divID}`).append('div').attr("style", 'margin: 15px').attr("id", graphID);
+    let div = d3.select(`#${divID}`)
+                .append('div')
+                // .attr("style", 'margin: 15px')
+                .attr("id", graphID)
+                .attr('class', 'dc-chart'); 
+    div.append("strong")
+        .text("test")
+        .attr('font-weight', 'bold'); 
+    div.append('div')
+        .attr('class', 'clearfix');
 }
 
 function createResetButton(chartID){
