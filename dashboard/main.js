@@ -92,7 +92,7 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
     return pie;
 }
 
-function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping, divID='filters', resetButton=true, barChartParameters={}){
+function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping, divID='filters', resetButton=true, ordering=false, barChartParameters={}){
     createGraphDiv(barChartID, divID, barChartID, barChartParameters['chartTitle'], barChartParameters['colLength']);
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
     var chart = dc.barChart(`#${barChartID}`);
@@ -102,7 +102,8 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
     chart
         .width(barChartParameters['width']||500)
         .height(barChartParameters['height']||200)
-        .gap(10)
+        .outerPadding(1)
+        .gap(5)
         .x(d3.scaleOrdinal())
         .xUnits(dc.units.ordinal)
         // .xAxisLabel(dimensionColumn)
@@ -110,13 +111,16 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         // .yAxisLabel("Count")
         .elasticY(true)
         .dimension(dimension)
-        .group(quantity);
+        .group(quantity)
+    if (ordering) {
+        chart.ordering(d => -d.value);
+    }
     chart.render();
     return chart;
 }
 
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
-    charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, {colLength: 12, width: 1000, height: 250})
+    charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, true, {colLength: 12, width: 1000, height: 250})
     charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true);
     charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0')
 });
