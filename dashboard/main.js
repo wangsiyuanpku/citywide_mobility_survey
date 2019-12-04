@@ -1,6 +1,6 @@
 "use strict";
 
-let data_loc = 'https://raw.githubusercontent.com/skyetim/citywide_mobility_survey/master/dashboard/mobility_general.json';
+let data_loc = 'https://raw.githubusercontent.com/skyetim/citywide_mobility_survey/master/data/mobility_general.json';
 let debug_mode = false;
 
 let charts = {};
