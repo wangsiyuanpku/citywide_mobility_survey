@@ -33,7 +33,7 @@ let identicalMapping = item => item;
 
 function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     let dimension = cf_data.dimension(item => mapping(item[dimensionColumn]));
-    let quantity = dimension.group().reduceCount(item => item);
+    let quantity = dimension.group().reduceSum(item => item.avgwt);
     let result = quantity.all();
 
     if (debug_mode) {
@@ -83,7 +83,7 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
         .height(180)
         // .innerRadius(50)
         .label(function(d) {
-                    return d.key + ': ' + d.value; 
+                    return d.key + ': ' + parseInt(d.value); 
             })
         .dimension(dimension)
         .group(quantity)
