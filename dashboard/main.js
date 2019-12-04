@@ -52,7 +52,6 @@ function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength
     }
     let div = d3.select(`#${divID}`)
                 .append('div')
-                // .attr("style", 'margin: 15px')
                 .attr("id", graphID)
                 .attr('class', `dc-chart col-${6}`); 
     div.append("strong")
@@ -80,8 +79,8 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
         bindResetButton(pieChartID);
     }
     pie
-        .width(200)
-        .height(200)
+        .width(180)
+        .height(180)
         // .innerRadius(50)
         .label(function(d) {
                     return d.key + ': ' + d.value; 
@@ -106,6 +105,7 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         .x(d3.scaleOrdinal())
         .xUnits(dc.units.ordinal)
         .xAxisLabel(dimensionColumn)
+        .margins({left: 50, right: 30, top: 0, bottom: 40})
         // .yAxisLabel("Count")
         .elasticY(true)
         .dimension(dimension)
