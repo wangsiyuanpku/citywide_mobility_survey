@@ -43,7 +43,7 @@ function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     return [dimension, quantity]
 }
 
-function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength=6, metaDivID='filters'){
+function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength=undefined, metaDivID='filters'){
     if (d3.select(`#${divID}`).empty()) {
         d3.select(`#${metaDivID}`)
           .append('div')
@@ -53,7 +53,7 @@ function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength
     let div = d3.select(`#${divID}`)
                 .append('div')
                 .attr("id", graphID)
-                .attr('class', `dc-chart col-${6}`); 
+                .attr('class', `dc-chart col-${colLength || 'sm'}`); 
     div.append("strong")
         .text(chartTitle || chartID);
     d3.select(`#${chartID}`)
@@ -70,8 +70,9 @@ function bindResetButton(chartID){
     .select('a')
     .attr('href', `javascript:charts['${chartID}'].filterAll();dc.redrawAll();`);
 }
-function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping, divID='filters', resetButton=true){
-    createGraphDiv(pieChartID, divID, pieChartID)
+function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping, divID='filters', resetButton=true, pieChartParameters={}){
+    console.log(pieChartParameters)
+    createGraphDiv(pieChartID, divID, pieChartID, pieChartParameters['chartTitle'], pieChartParameters['colLength'])
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
 
     var pie = dc.pieChart(`#${pieChartID}`);
@@ -91,8 +92,8 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
     return pie;
 }
 
-function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping, divID='filters', resetButton=true, ...barParameters){
-    createGraphDiv(barChartID, divID, barChartID);
+function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping, divID='filters', resetButton=true, barChartParameters={}){
+    createGraphDiv(barChartID, divID, barChartID, barChartParameters['chartTitle'], barChartParameters['colLength']);
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
     var chart = dc.barChart(`#${barChartID}`);
     if (resetButton){
@@ -115,6 +116,6 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
 }
 
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
-    charts['pie1'] = pieChart(cf_data, 'qgender', "pie1", genderMapping, 'row0');
-    charts['bar1'] = barChart(cf_data, 'qage', 'bar1', ageMapping, 'row0')
+    charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true);
+    charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0')
 });
