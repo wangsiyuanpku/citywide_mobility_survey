@@ -73,6 +73,17 @@ function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     return [dimension, quantity]
 }
 
+function dataCount(cf_data){
+    dc.dataCount('#reset-all')
+      .crossfilter(cf_data)
+      .groupAll(cf_data.groupAll())
+      .html({
+        some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+            ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'>Reset All</a>',
+        all: 'All records selected. Please click on the graph to apply filters.'
+    });
+}
+
 function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength=undefined, metaDivID='filters'){
     if (d3.select(`#${divID}`).empty()) {
         d3.select(`#${metaDivID}`)
@@ -157,6 +168,7 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
 }
 
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
+    dataCount(cf_data);
     charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, true, false, {colLength: 12, width: 1000, height: 250})
     charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true, {colLength: 2});
     charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0');
