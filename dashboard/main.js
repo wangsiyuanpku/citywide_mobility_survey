@@ -100,12 +100,12 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         bindResetButton(barChartID);
     }
     chart
-        .width(500)
-        .height(200)
-        .gap(0)
+        .width(barChartParameters['width']||500)
+        .height(barChartParameters['height']||200)
+        .gap(10)
         .x(d3.scaleOrdinal())
         .xUnits(dc.units.ordinal)
-        .xAxisLabel(dimensionColumn)
+        // .xAxisLabel(dimensionColumn)
         .margins({left: 50, right: 30, top: 0, bottom: 40})
         // .yAxisLabel("Count")
         .elasticY(true)
@@ -116,6 +116,7 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
 }
 
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
+    charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, {colLength: 12, width: 1000, height: 250})
     charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true);
     charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0')
 });
