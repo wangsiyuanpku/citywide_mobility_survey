@@ -22,18 +22,31 @@ let identicalMapping = {
     get(item) {return item;}
 }
 
+// let ageMapping = {
+//     get(item) {
+//         if (item <=24) {
+//             return '19-24'
+//         } else if (item <= 54) {
+//             return '20-54'
+//         } else if (item <= 64) {
+//             return '55-64'
+//         } else if (item <= 100){
+//             return '>65'
+//         } else {
+//             return 'Refused to answer'
+//         }
+//     }
+// }
+
 let ageMapping = {
     get(item) {
-        if (item <=24) {
-            return '19-24'
-        } else if (item <= 54) {
-            return '20-54'
-        } else if (item <= 64) {
-            return '55-64'
-        } else if (item <= 100){
-            return '>65'
+        if (item <= 30) {
+            return '19-29'
+        } else if (item >=100){
+            return 'Refused to answer';
         } else {
-            return 'Refused to answer'
+            let digit = parseInt(item/10);
+            return `${digit}0-${digit}9`
         }
     }
 }
@@ -209,7 +222,7 @@ d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     charts['License'] = pieChart(cf_data, 'qlicense', 'License', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Driver License? "})
     charts['Smartphone'] = pieChart(cf_data, 'qsmartphone', 'Smartphone', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Smartphone? "})
     charts['Rent'] = pieChart(cf_data, 'qrent', 'Rent', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Rent (Yes) or Own (No) home? "})
-    charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0');
+    charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0', true, false, true);
     charts['Race'] = barChart(cf_data, 'qrace', 'Race', raceMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
     charts['Education'] = barChart(cf_data, 'qeducation', 'Education', eduMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
     charts['Income'] = barChart(cf_data, 'qincome', 'Income', incMapping, 'row2', true, 'key', true, {colLength: 6, width: 550});
