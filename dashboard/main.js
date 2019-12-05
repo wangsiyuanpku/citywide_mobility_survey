@@ -5,32 +5,48 @@ let debug_mode = false;
 
 let charts = {};
 
-let genderMapping = (item) =>{
-    let syntax = {
-        1 : "Male",
-        2 : "Female",
-        3 : "Other",
-        4 : "Other"
-    };
-    return syntax[item];
-}
+const getKey = (obj,val) => Object.keys(obj.syntax).find(key => obj.syntax[key] === val);
 
-let ageMapping = function(item){
-    if (item <=24) {
-        return '19-24'
-    } else if (item <= 54) {
-        return '20-54'
-    } else if (item <= 64) {
-        return '55-64'
-    } else if (item <= 100){
-        return '>65'
-    } else {
-        return 'Refused to answer'
+let CatagoricalMapping = function(syntax) {
+    let _syntax = syntax;
+    return {
+        get syntax() {return _syntax;}, 
+        get(item) {return _syntax[item]},
+        getKey(val) {
+            return Object.keys(_syntax).find(key => _syntax[key] === val);
+        }
     }
 }
 
-let raceMapping = function(item){
-    let syntax = {
+let identicalMapping = {
+    get(item) {return item;}
+}
+
+let ageMapping = {
+    get(item) {
+        if (item <=24) {
+            return '19-24'
+        } else if (item <= 54) {
+            return '20-54'
+        } else if (item <= 64) {
+            return '55-64'
+        } else if (item <= 100){
+            return '>65'
+        } else {
+            return 'Refused to answer'
+        }
+    }
+}
+
+let genderMapping = new CatagoricalMapping({
+            1 : "Male",
+            2 : "Female",
+            3 : "Other",
+            4 : "Other"
+        })
+
+
+let raceMapping = new CatagoricalMapping({
         1 : "White",
         2 : "Black",
         3 : "Asian",
@@ -40,12 +56,9 @@ let raceMapping = function(item){
         7 : "2+ Races",
         8 : "Other",
         9 : "Other",
-    }
-    return syntax[item]
-}
+    })
 
-let eduMapping = function(item){
-    let syntax = {
+let eduMapping = new CatagoricalMapping({
         1 : "No high school",
         2 : "Some high school",
         3 : "High school",
@@ -53,16 +66,27 @@ let eduMapping = function(item){
         5 : "Associate",
         6 : "Bachelor",
         7 : "Graduate",
-        8 : "Other",
-        9 : "Other"
-    }
-    return syntax[item]
-}
+        8 : "Other", // Don't know
+        9 : "Other"  // "Refused"
+    })
 
-let identicalMapping = item => item;
+let incMapping = new CatagoricalMapping({
+        1 : "Less than $14,999",
+        2 : "$15,000 - $24,999",
+        3 : "$25,000 - $34,999",
+        4 : "$35,000 - $49,999",
+        5 : "$50,000 - $74,999",
+        6 : "$75,000 - $99,999",
+        7 : "$100,000 - $149,999",
+        8 : "$150,000-$199,999",
+        9 : "$200,000 and above",
+        10 : "Other", // Don't know
+        11 : "Other"  // "Refused"
+    })
+
 
 function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
-    let dimension = cf_data.dimension(item => mapping(item[dimensionColumn]));
+    let dimension = cf_data.dimension(item => mapping.get(item[dimensionColumn]));
     let quantity = dimension.group().reduceSum(item => item.avgwt);
     let result = quantity.all();
 
@@ -152,8 +176,12 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         .elasticY(true)
         .dimension(dimension)
         .group(quantity)
-    if (ordering) {
-        chart.ordering(d => -d.value);
+    if (ordering != false) {
+        if (ordering == 'value') {
+            chart.ordering(d => -d.value);
+        } else if (ordering == 'key') {
+            chart.ordering(d => mapping.getKey(d.key));
+        }
     }
     chart.render();
     if (rotate) {
@@ -172,6 +200,8 @@ d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, true, false, {colLength: 12, width: 1000, height: 250})
     charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true, {colLength: 2});
     charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0');
-    charts['Race'] = barChart(cf_data, 'qrace', 'Race', raceMapping, 'row1', true, true, true, {colLength: 6, width: 550});
-    charts['Education'] = barChart(cf_data, 'qeducation', 'Education', eduMapping, 'row1', true, true, true, {colLength: 6, width: 550});
+    charts['Race'] = barChart(cf_data, 'qrace', 'Race', raceMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
+    charts['Education'] = barChart(cf_data, 'qeducation', 'Education', eduMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
+    charts['Income'] = barChart(cf_data, 'qincome', 'Income', incMapping, 'row2', true, 'key', true, {colLength: 6, width: 550});
+
 });
