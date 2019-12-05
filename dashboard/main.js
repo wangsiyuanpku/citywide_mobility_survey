@@ -84,6 +84,13 @@ let incMapping = new CatagoricalMapping({
         11 : "Other"  // "Refused"
     })
 
+let binaryMapping = new CatagoricalMapping({
+    1 : "Yes",
+    2 : "No",
+    3 : "Other", // Don't know
+    4 : "Other"  // "Refused"
+})
+
 
 function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     let dimension = cf_data.dimension(item => mapping.get(item[dimensionColumn]));
@@ -146,7 +153,7 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
     pie
         .width(180)
         .height(180)
-        // .innerRadius(50)
+        .innerRadius(pieChartParameters['innerRadius'] || 0)
         .label(function(d) {
                     return d.key + ': ' + parseInt(d.value); 
             })
@@ -177,10 +184,10 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         .dimension(dimension)
         .group(quantity)
     if (ordering != false) {
-        if (ordering == 'value') {
-            chart.ordering(d => -d.value);
-        } else if (ordering == 'key') {
+        if (ordering == 'key') {
             chart.ordering(d => mapping.getKey(d.key));
+        } else {
+            chart.ordering(d => -d.value);
         }
     }
     chart.render();
@@ -197,8 +204,11 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
 
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     dataCount(cf_data);
-    charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, true, false, {colLength: 12, width: 1000, height: 250})
-    charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true, {colLength: 2});
+    charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, 'value', false, {colLength: 12, width: 1000, height: 250})
+    charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true, {colLength: 3});
+    charts['License'] = pieChart(cf_data, 'qlicense', 'License', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Driver License? "})
+    charts['Smartphone'] = pieChart(cf_data, 'qsmartphone', 'Smartphone', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Smartphone? "})
+    charts['Rent'] = pieChart(cf_data, 'qrent', 'Rent', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Rent (Yes) or Own (No) home? "})
     charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0');
     charts['Race'] = barChart(cf_data, 'qrace', 'Race', raceMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
     charts['Education'] = barChart(cf_data, 'qeducation', 'Education', eduMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
