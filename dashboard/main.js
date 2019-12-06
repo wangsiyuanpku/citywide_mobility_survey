@@ -200,7 +200,7 @@ function dataCount(cf_data){
     });
 }
 
-function createGraphDiv(chartID, divID, chartTitle=undefined, colLength=undefined, metaDivID='filters'){
+function createGraphDiv(chartID, divID, chartTitle=undefined, colLength=undefined, resetButton=true, metaDivID='filters'){
     if (d3.select(`#${divID}`).empty()) {
         d3.select(`#${metaDivID}`)
           .append('div')
@@ -220,6 +220,9 @@ function createGraphDiv(chartID, divID, chartTitle=undefined, colLength=undefine
     .text('reset');
     div.append('div')
         .attr('class', 'clearfix');
+    if(resetButton){
+        bindResetButton(chartID);
+    }
 }
 
 function bindResetButton(chartID){
@@ -228,13 +231,10 @@ function bindResetButton(chartID){
     .attr('href', `javascript:charts['${chartID}'].filterAll();dc.redrawAll();`);
 }
 function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping, divID='filters', resetButton=true, pieChartParameters={}){
-    createGraphDiv(pieChartID, divID, pieChartParameters['chartTitle'], pieChartParameters['colLength'])
+    createGraphDiv(pieChartID, divID, pieChartParameters['chartTitle'], pieChartParameters['colLength'], resetButton)
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
 
     var pie = dc.pieChart(`#${pieChartID}`);
-    if (resetButton){
-        bindResetButton(pieChartID);
-    }
     pie
         .width(180)
         .height(180)
@@ -249,12 +249,9 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
 }
 
 function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping, divID='filters', resetButton=true, ordering=false, rotate=false, barChartParameters={}){
-    createGraphDiv(barChartID, divID, barChartParameters['chartTitle'], barChartParameters['colLength']);
+    createGraphDiv(barChartID, divID, barChartParameters['chartTitle'], barChartParameters['colLength'], resetButton);
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
     var chart = dc.barChart(`#${barChartID}`);
-    if (resetButton){
-        bindResetButton(barChartID);
-    }
     chart
         .width(barChartParameters['width']||500)
         .height(barChartParameters['height']||200)
@@ -288,13 +285,10 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
 }
 
 function heatMap(cf_data, keyAccessorColumn, valueAccessorColumn, keyAccessorMapping, valueAccessorMapping, heatMapChartID, divID, resetButton=true, heatMapParameters={}) {
-    createGraphDiv(heatMapChartID, divID, heatMapParameters['chartTitle'], heatMapParameters['colLength']);
+    createGraphDiv(heatMapChartID, divID, heatMapParameters['chartTitle'], heatMapParameters['colLength'], resetButton);
     let [dimensions, quantity] = groupData(cf_data, [keyAccessorColumn, valueAccessorColumn], [keyAccessorMapping, valueAccessorMapping])
 
     var chart = dc.heatMap(`#${heatMapChartID}`);
-    if (resetButton){
-        bindResetButton(heatMapChartID);
-    }
     chart
     .width(heatMapParameters['width']||1200)
     .height(heatMapParameters['height']||200)
