@@ -152,13 +152,38 @@ let freqMapping = new CatagoricalMapping({
     8 : "Other"  // "Refused"
 })
 
-function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
+function groupData(cf_data, dimensionColumns, mappings) {
+    if (typeof(dimensionColumns) === 'string') {
+        return unigroupData(cf_data, dimensionColumns, mappings)
+    }
+    return multigroupData(cf_data, dimensionColumns, mappings)
+}
+
+function unigroupData(cf_data, dimensionColumn, mapping) {
     let dimension = cf_data.dimension(item => mapping.get(item[dimensionColumn]));
     let quantity = dimension.group().reduceSum(item => item.avgwt);
     let result = quantity.all();
 
     if (debug_mode) {
         console.log(dimensionColumn);
+        console.log(result);
+    }
+    return [dimension, quantity]
+}
+
+function multigroupData(cf_data, dimensionColumns, mappings) {
+    let dimension = cf_data.dimension(item => {
+        var result = []
+        for (let index = 0; index < dimensionColumns.length; index++) {
+            result.push(mappings[index].get(item[dimensionColumns[index]]))
+        }
+        return result;
+    });
+    let quantity = dimension.group().reduceSum(item => item.avgwt);
+    let result = quantity.all();
+
+    if (debug_mode) {
+        console.log(dimensionColumns);
         console.log(result);
     }
     return [dimension, quantity]
@@ -262,6 +287,35 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
     return chart;
 }
 
+function heatMap(cf_data, keyAccessorColumn, valueAccessorColumn, keyAccessorMapping, valueAccessorMapping, heatMapChartID, divID, resetButton=true, heatMapParameters={}) {
+    createGraphDiv(heatMapChartID, divID, heatMapParameters['chartTitle'], heatMapParameters['colLength']);
+    let [dimensions, quantity] = groupData(cf_data, [keyAccessorColumn, valueAccessorColumn], [keyAccessorMapping, valueAccessorMapping])
+
+    var chart = dc.heatMap(`#${heatMapChartID}`);
+    if (resetButton){
+        bindResetButton(heatMapChartID);
+    }
+    chart
+    .width(heatMapParameters['width']||1200)
+    .height(heatMapParameters['height']||200)
+    .dimension(dimensions)
+    .group(quantity)
+    .keyAccessor(function(d) { return d.key[0]; })
+    .valueAccessor(function(d) { return d.key[1]; })
+    .colorAccessor(function(d) { return +d.value; })
+    .title(function(d) {
+        return `${keyAccessorColumn}:   ` + d.key[0] + "\n" +
+               `${valueAccessorColumn}:   ` + d.key[1] + "\n" +
+               "Count: " + d.value;})
+    .margins({left: 50, right: 30, top: 0, bottom: 40})
+    .xBorderRadius(0)
+    .colors(["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"])
+    .calculateColorDomain();
+    
+    chart.render();
+    return chart
+
+}
 
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     dataCount(cf_data);
@@ -278,4 +332,5 @@ d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     charts['Employment'] = barChart(cf_data, 'qemployment', 'Employment', employmentMapping, 'row3', true, 'key', true, {colLength: 6, width: 550})
     charts['TimeInNYC'] = barChart(cf_data, 'qnyc', 'TimeInNYC', timeInNYCMapping, 'row3', true, 'key', true, {colLength: 6, width: 550, chartTitle: "How long have you been living in NYC? "})
     charts['Married'] = barChart(cf_data, 'qmarried', 'Married', marriedMapping, 'row4', true, 'key', true, {chartTitle: "Marital Status"})
+    charts['test'] = heatMap(cf_data, 'qnyc', 'qgender', timeInNYCMapping, genderMapping, 'test', 'row5', true, {colLength: 12})
 });
