@@ -175,7 +175,7 @@ function dataCount(cf_data){
     });
 }
 
-function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength=undefined, metaDivID='filters'){
+function createGraphDiv(chartID, divID, chartTitle=undefined, colLength=undefined, metaDivID='filters'){
     if (d3.select(`#${divID}`).empty()) {
         d3.select(`#${metaDivID}`)
           .append('div')
@@ -184,7 +184,7 @@ function createGraphDiv(graphID, divID, chartID, chartTitle=undefined, colLength
     }
     let div = d3.select(`#${divID}`)
                 .append('div')
-                .attr("id", graphID)
+                .attr("id", chartID)
                 .attr('class', `dc-chart col-sm-${colLength || 4}`); 
     div.append("strong")
         .text(chartTitle || chartID);
@@ -203,7 +203,7 @@ function bindResetButton(chartID){
     .attr('href', `javascript:charts['${chartID}'].filterAll();dc.redrawAll();`);
 }
 function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping, divID='filters', resetButton=true, pieChartParameters={}){
-    createGraphDiv(pieChartID, divID, pieChartID, pieChartParameters['chartTitle'], pieChartParameters['colLength'])
+    createGraphDiv(pieChartID, divID, pieChartParameters['chartTitle'], pieChartParameters['colLength'])
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
 
     var pie = dc.pieChart(`#${pieChartID}`);
@@ -224,7 +224,7 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
 }
 
 function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping, divID='filters', resetButton=true, ordering=false, rotate=false, barChartParameters={}){
-    createGraphDiv(barChartID, divID, barChartID, barChartParameters['chartTitle'], barChartParameters['colLength']);
+    createGraphDiv(barChartID, divID, barChartParameters['chartTitle'], barChartParameters['colLength']);
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)
     var chart = dc.barChart(`#${barChartID}`);
     if (resetButton){
