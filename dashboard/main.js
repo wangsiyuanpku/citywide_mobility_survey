@@ -104,6 +104,53 @@ let binaryMapping = new CatagoricalMapping({
     4 : "Other"  // "Refused"
 })
 
+let employmentMapping = new CatagoricalMapping({
+    1 : "Employed full time",
+    2 : "Employed part time",
+    3 : "Unemployed",
+    4 : "Stay-at-home parent",
+    5 : "Volunteer work",
+    6 : "Full time student",
+    7 : "Part-time student",
+    8 : "Retired",
+    9 : "Active military service",
+    10 : "Other",
+    11 : "Other", // Don't know
+    12 : "Other"  // "Refused"
+})
+
+let timeInNYCMapping = new CatagoricalMapping({
+    1 : "Less than 1 year",
+    2 : "1 to 3 years",
+    3 : "4 to 6 years",
+    4 : "6 to 10 years",
+    5 : "10 to 20 years",
+    6 : "20 to 30 years",
+    7 : "30+ years",
+    8 : "Other", // Don't know
+    9 : "Other"  // "Refused"
+})
+
+let marriedMapping = new CatagoricalMapping({
+    1 : "Single",
+    2 : "Married",
+    3 : "Widowed",
+    4 : "Divorced",
+    5 : "Committed partnership",
+    6 : "Other", // Don't know
+    7 : "Other"  // "Refused"
+})
+
+let freqMapping = new CatagoricalMapping({
+    1 : "Daily",
+    2 : "Most days",
+    3 : "A few times a week",
+    4 : "A few times a month",
+    5 : "A few times a year",
+    6 : "Never",
+    7 : "Other", // Don't know
+    8 : "Other"  // "Refused"
+})
 
 function groupData(cf_data, dimensionColumn, mapping=identicalMapping) {
     let dimension = cf_data.dimension(item => mapping.get(item[dimensionColumn]));
@@ -215,9 +262,10 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
     return chart;
 }
 
+
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     dataCount(cf_data);
-    charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, 'value', false, {colLength: 12, width: 1000, height: 250})
+    charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, 'value', false, {colLength: 12, width: 1100, height: 250})
     charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true, {colLength: 3});
     charts['License'] = pieChart(cf_data, 'qlicense', 'License', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Driver License? "})
     charts['Smartphone'] = pieChart(cf_data, 'qsmartphone', 'Smartphone', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Smartphone? "})
@@ -226,5 +274,8 @@ d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     charts['Race'] = barChart(cf_data, 'qrace', 'Race', raceMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
     charts['Education'] = barChart(cf_data, 'qeducation', 'Education', eduMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
     charts['Income'] = barChart(cf_data, 'qincome', 'Income', incMapping, 'row2', true, 'key', true, {colLength: 6, width: 550});
-
+    charts['Borough'] = pieChart(cf_data, 'borough', 'Borough', identicalMapping, 'row2', true, {colLength: 3})
+    charts['Employment'] = barChart(cf_data, 'qemployment', 'Employment', employmentMapping, 'row3', true, 'key', true, {colLength: 6, width: 550})
+    charts['TimeInNYC'] = barChart(cf_data, 'qnyc', 'TimeInNYC', timeInNYCMapping, 'row3', true, 'key', true, {colLength: 6, width: 550, chartTitle: "How long have you been living in NYC? "})
+    charts['Married'] = barChart(cf_data, 'qmarried', 'Married', marriedMapping, 'row4', true, 'key', true, {chartTitle: "Marital Status"})
 });
