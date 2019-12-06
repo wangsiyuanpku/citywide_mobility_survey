@@ -12,4 +12,6 @@ df_travel_avg = df_travel %>%
 
 df_general_avg = df_travel_avg %>% merge(df_general, by="UniqueID", all=TRUE) %>% select(-c('allwt', 'travel_code', 'Description')) %>% filter(Number > 0)
 
-write_json( df_general_avg, 'data/mobility_general.json')
+df_general_avg_gather = df_general_avg %>% gather(key='Question', value='Answer', -c(1:13, 18:20, 26:31)) %>% mutate(avgwt = avgwt/9)
+
+write_json( df_general_avg_gather, 'data/mobility_general.json')
