@@ -252,6 +252,24 @@ function bindResetButton(chartID){
     .select('a')
     .attr('href', `javascript:charts['${chartID}'].filterAll();dc.redrawAll();`);
 }
+
+function stickyTop(mode){
+    let class_attr, a_href, a_text = undefined
+    if (mode == 'stick') {
+        class_attr = 'sticky-top bg-white'
+        a_href = 'javascript:stickyTop("unstick")'
+        a_text = 'Unfreeze header pane'
+    } else if (mode == 'unstick') {
+        class_attr = ''
+        a_href = 'javascript:stickyTop("stick")'
+        a_text = 'Freeze header pane'
+    }
+    d3.select(`#header`)
+    .attr('class', class_attr)
+    d3.select(`#stickButton`)
+    .attr('href', a_href)
+    .text(a_text)
+}
 function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping, divID='filters', resetButton=true, pieChartParameters={}){
     createGraphDiv(pieChartID, divID, pieChartParameters['chartTitle'], pieChartParameters['colLength'], resetButton)
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)

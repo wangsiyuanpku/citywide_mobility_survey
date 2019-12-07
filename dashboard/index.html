@@ -11,7 +11,7 @@
     </head>
 
     <div class='container'>
-        <div id='header' class='sticky-top bg-white'>
+        <div id='header'>
             <h1 class='text-center'>
                 Dashboard for Citywide Mobility Survey
             </h1>
@@ -21,11 +21,14 @@
                 The purpose of this dashboard is: 
             </p>
     
-            <div class='row sticky-top bg-white' id="preference"></div>
+            <div class='row' id="preference"></div>
             <div class='row'>
                 <div class='dc-data-count dc-chart' id='reset-all'>
                     All records selected. Please click on the graph to apply filters.
                 </div>
+            </div>
+            <div class='row'>
+                <a id='stickButton' href="javascript:stickyTop('stick')" class='float-right'>Freeze header pane</a>
             </div>
         </div>
 
