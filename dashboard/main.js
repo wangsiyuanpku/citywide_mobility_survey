@@ -22,22 +22,6 @@ let identicalMapping = {
     get(item) {return item;}
 }
 
-// let ageMapping = {
-//     get(item) {
-//         if (item <=24) {
-//             return '19-24'
-//         } else if (item <= 54) {
-//             return '20-54'
-//         } else if (item <= 64) {
-//             return '55-64'
-//         } else if (item <= 100){
-//             return '>65'
-//         } else {
-//             return 'Refused to answer'
-//         }
-//     }
-// }
-
 let ageMapping = {
     get(item) {
         if (item <= 30) {
@@ -150,6 +134,44 @@ let freqMapping = new CatagoricalMapping({
     6 : "Never",
     7 : "Other", // Don't know
     8 : "Other"  // "Refused"
+})
+
+let improveAnsMapping = new CatagoricalMapping({
+    1 : "Extremely important", 
+    2 : "Very important", 
+    3 : "Somewhat important", 
+    4 : "Not very important", 
+    5 : "Not at all important", 
+    6 : "Don't know", 
+    7 : "Refused",
+    99: "Other" // DEBUG: I don't know what this is
+})
+
+let improveQuestionMapping = new CatagoricalMapping({
+    "gIMPROVE1_qIMPROVE1_mA": "Making it safer for pedestrians to cross the street", 
+    "gIMPROVE1_qIMPROVE2_mA": "Making it safer and easier to bike by adding bike lanes", 
+    "gIMPROVE1_qIMPROVE3_mA": "Making bus service faster and more reliable by adding bus lanes", 
+    "gIMPROVE1_qIMPROVE4_mA": "Making it easier to drive by reducing congestion", 
+    "gIMPROVE1_qIMPROVE5_mA": "Making streets and public spaces greener and more attractive"
+})
+
+let freightAnsMapping = new CatagoricalMapping({
+    1 : "Daily",
+    2 : "Most days",
+    3 : "A few times a week",
+    4 : "A few times a month",
+    5 : "A few times a year",
+    6 : "Never",
+    7 : "Don't know", 
+    8 : "Refused",
+    99: "Other" // DEBUG: I don't know what this is
+})
+
+let freightQuestionMapping = new CatagoricalMapping({
+    "gFREIGHT1_qFREIGHT1_mA": "Groceries/liquor/household staples", 
+    "gFREIGHT1_qFREIGHT2_mA": "Prepared food (take out)", 
+    "gFREIGHT1_qFREIGHT3_mA": "Personal items",
+    "gFREIGHT1_qFREIGHT4_mA": "Other packages (clothing, Amazon etc.)"
 })
 
 function groupData(cf_data, dimensionColumns, mappings) {
@@ -286,22 +308,24 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
 
 function heatMap(cf_data, keyAccessorColumn, valueAccessorColumn, keyAccessorMapping, valueAccessorMapping, heatMapChartID, divID, resetButton=true, heatMapParameters={}) {
     createGraphDiv(heatMapChartID, divID, heatMapParameters['chartTitle'], heatMapParameters['colLength'], resetButton);
-    let [dimensions, quantity] = groupData(cf_data, [keyAccessorColumn, valueAccessorColumn], [keyAccessorMapping, valueAccessorMapping])
+    let [dimensions, quantity] = groupData(cf_data, [keyAccessorColumn, valueAccessorColumn], [identicalMapping, identicalMapping])
 
     var chart = dc.heatMap(`#${heatMapChartID}`);
     chart
-    .width(heatMapParameters['width']||1200)
+    .width(heatMapParameters['width']||1100)
     .height(heatMapParameters['height']||200)
     .dimension(dimensions)
     .group(quantity)
     .keyAccessor(function(d) { return d.key[0]; })
     .valueAccessor(function(d) { return d.key[1]; })
     .colorAccessor(function(d) { return +d.value; })
+    .colsLabel(d => keyAccessorMapping.get(d))
+    .rowsLabel(d => valueAccessorMapping.get(d))
     .title(function(d) {
         return `${keyAccessorColumn}:   ` + d.key[0] + "\n" +
                `${valueAccessorColumn}:   ` + d.key[1] + "\n" +
                "Count: " + d.value;})
-    .margins({left: 50, right: 30, top: 0, bottom: 40})
+    .margins({left: heatMapParameters['marginsLeft']||200, right: 30, top: 0, bottom: 40})
     .xBorderRadius(0)
     .colors(["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"])
     .calculateColorDomain();
@@ -326,5 +350,6 @@ d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     charts['Employment'] = barChart(cf_data, 'qemployment', 'Employment', employmentMapping, 'row3', true, 'key', true, {colLength: 6, width: 550})
     charts['TimeInNYC'] = barChart(cf_data, 'qnyc', 'TimeInNYC', timeInNYCMapping, 'row3', true, 'key', true, {colLength: 6, width: 550, chartTitle: "How long have you been living in NYC? "})
     charts['Married'] = barChart(cf_data, 'qmarried', 'Married', marriedMapping, 'row4', true, 'key', true, {chartTitle: "Marital Status"})
-    charts['test'] = heatMap(cf_data, 'qnyc', 'qgender', timeInNYCMapping, genderMapping, 'test', 'row5', true, {colLength: 12})
+    charts['Freight'] = heatMap(cf_data, 'FreightAnswer', 'qFreight', freightAnsMapping, freightQuestionMapping, 'Freight', 'row5', true, {colLength: 12, chartTitle: "How often do you receive deliveries at home for the following?"})
+    charts['Improve'] = heatMap(cf_data, 'ImproveAnswer', 'qImprove', improveAnsMapping, improveQuestionMapping, 'Improve', 'row5', true, {colLength: 12, chartTitle: "How important are the following to you? ", marginsLeft: 300})
 });
