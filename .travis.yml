@@ -10,6 +10,7 @@ repos:
 script:
 - Rscript -e 'bookdown::render_book("index.Rmd")'
 - cp dashboard/main.js _book/dashboard
+- cp dashboard/loader.css _book/dashboard
 deploy:
   provider: pages
   local_dir: _book

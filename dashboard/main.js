@@ -279,6 +279,16 @@ function stickyTop(mode){
     .attr('href', a_href)
     .text(a_text)
 }
+
+function onload(){
+    setTimeout(showPage, 6000);
+}
+
+function showPage(){
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("main").style.display = "block";
+}
+
 function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping, divID='filters', resetButton=true, pieChartParameters={}){
     createGraphDiv(pieChartID, divID, pieChartParameters['chartTitle'], pieChartParameters['colLength'], resetButton)
     let [dimension, quantity] = groupData(cf_data, dimensionColumn, mapping)

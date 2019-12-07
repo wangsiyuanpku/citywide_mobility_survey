@@ -4,40 +4,53 @@
         <title>Dashboard for Citywide Mobility Survey</title>
         <meta charset="UTF-8">
         <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/3.1.5/dc.css"/>
+        <link rel="stylesheet" type="text/css" href='loader.css'>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script type='text/javascript' src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.12.0/d3.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/3.1.5/dc.js"></script>
     </head>
 
-    <div class='container'>
-        <div id='header' class='sticky-top bg-white'>
-            <h1 class='text-center'>
-                Dashboard for Citywide Mobility Survey
-            </h1>
-    
-            <p>
-                [It's still under construction.]
-                The purpose of this dashboard is: 
-            </p>
-    
-            <div class='row' id="preference"></div>
-            <div class='row'>
-                <div class='dc-data-count dc-chart' id='reset-all'>
-                    All records selected. Please click on the graph to apply filters.
+    <body onload='javascript:onload()'>
+        <div class="container" id='loader'>
+
+            <svg class="loader" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340">
+                    <circle cx="170" cy="170" r="160" stroke="#E2007C"/>
+                    <circle cx="170" cy="170" r="135" stroke="#404041"/>
+                    <circle cx="170" cy="170" r="110" stroke="#E2007C"/>
+                    <circle cx="170" cy="170" r="85" stroke="#404041"/>
+            </svg>
+            
+        </div>
+        <div class='container animate-bottom' style='display:none;' id='main'>
+            <div id='header' class='sticky-top bg-white'>
+                <h1 class='text-center'>
+                    Dashboard for Citywide Mobility Survey
+                </h1>
+        
+                <p>
+                    [It's still under construction.]
+                    The purpose of this dashboard is: 
+                </p>
+        
+                <div class='row' id="preference"></div>
+                <div class='row'>
+                    <div class='dc-data-count dc-chart' id='reset-all'>
+                        All records selected. Please click on the graph to apply filters.
+                    </div>
+                </div>
+                <div class='row'>
+                    <a id='stickButton' href="javascript:stickyTop('unstick')" class='float-right'>Unfreeze header pane</a>
                 </div>
             </div>
-            <div class='row'>
-                <a id='stickButton' href="javascript:stickyTop('unstick')" class='float-right'>Unfreeze header pane</a>
-            </div>
+    
+    
+            <div id="filters"></div>
+    
         </div>
+    </body>
 
-
-        <div id="filters"></div>
-
-    </div>
-
-
-    <!-- <script type='text/javascript' src='example.js'></script> -->
     <script type='text/javascript' src='main.js'></script>
 </html>
