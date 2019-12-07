@@ -236,7 +236,7 @@ function createGraphDiv(chartID, divID, chartTitle=undefined, colLength=undefine
         d3.select(`#${metaDivID}`)
           .append('div')
           .attr('id', divID)
-          .attr('class', 'row')
+          .attr('class', 'row mb-4')
     }
     let div = d3.select(`#${divID}`)
                 .append('div')
