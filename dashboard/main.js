@@ -281,7 +281,7 @@ function stickyTop(mode){
 }
 
 function onload(){
-    setTimeout(showPage, 6000);
+    setTimeout(showPage, 4000);
 }
 
 function showPage(){
