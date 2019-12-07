@@ -220,14 +220,28 @@ function multigroupData(cf_data, dimensionColumns, mappings) {
     return [dimension, quantity]
 }
 
+// function dataCount(cf_data){
+//     dc.dataCount('#reset-all')
+//       .crossfilter(cf_data)
+//       .groupAll(cf_data.groupAll())
+//       .html({
+//         some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+//             ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'>Reset All</a>',
+//         all: 'All records selected. Please click on the graph to apply filters.'
+//     });
+// }
+
 function dataCount(cf_data){
-    dc.dataCount('#reset-all')
-      .crossfilter(cf_data)
-      .groupAll(cf_data.groupAll())
+    let uidDimension = cf_data.dimension(item => item.UniqueID)
+    let total = cf_data.groupAll().reduceSum(item=>item.avgwt).value()
+    let cntID = uidDimension.groupAll().reduceSum(item => item.avgwt)
+    dc.numberDisplay('#reset-all')
+      .group(cntID)
+      .valueAccessor(item => item)
+      .formatNumber(d3.format('.0f'))
       .html({
-        some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-            ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'>Reset All</a>',
-        all: 'All records selected. Please click on the graph to apply filters.'
+        some: `<strong>%number</strong> selected out of <strong>${total.toFixed(0)}</strong> records` +
+            ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'>Reset All</a>'
     });
 }
 
