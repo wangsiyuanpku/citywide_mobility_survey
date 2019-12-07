@@ -279,13 +279,13 @@ function bindResetButton(chartID){
 function stickyTop(mode){
     let class_attr, a_href, a_text = undefined
     if (mode == 'stick') {
-        class_attr = 'sticky-top bg-light'
+        class_attr = 'sticky-top bg-light mt-4 mb-4'
         a_href = 'javascript:stickyTop("unstick")'
-        a_text = 'Unfreeze header pane'
+        a_text = 'Unfix preference bar chart'
     } else if (mode == 'unstick') {
-        class_attr = 'bg-light'
+        class_attr = 'mt-4 mb-4'
         a_href = 'javascript:stickyTop("stick")'
-        a_text = 'Freeze header pane'
+        a_text = 'Fix preference bar chart at top'
     }
     d3.select(`#header`)
     .attr('class', class_attr)
