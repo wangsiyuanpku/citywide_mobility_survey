@@ -174,6 +174,15 @@ let freightQuestionMapping = new CatagoricalMapping({
     "gFREIGHT1_qFREIGHT4_mA": "Other packages (clothing, Amazon etc.)"
 })
 
+let safeMapping = new CatagoricalMapping({
+    1 : "Very safe",
+    2 : "Somewhat safe",
+    3 : "Somewhat unsafe",
+    4 : "Not safe at all",
+    5 : "Other", // Don't know
+    6 : "Other"  // "Refused"
+})
+
 function groupData(cf_data, dimensionColumns, mappings) {
     if (typeof(dimensionColumns) === 'string') {
         return unigroupData(cf_data, dimensionColumns, mappings)
@@ -295,13 +304,10 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
     chart
         .width(barChartParameters['width']||500)
         .height(barChartParameters['height']||200)
-        .outerPadding(1)
-        .gap(5)
+        .barPadding(0.1)
         .x(d3.scaleOrdinal())
         .xUnits(dc.units.ordinal)
-        // .xAxisLabel(dimensionColumn)
         .margins({left: 50, right: 30, top: 0, bottom: 40})
-        // .yAxisLabel("Count")
         .elasticY(true)
         .dimension(dimension)
         .group(quantity)
@@ -370,4 +376,6 @@ d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     charts['Married'] = barChart(cf_data, 'qmarried', 'Married', marriedMapping, 'row4', true, 'key', true, {chartTitle: "Marital Status"})
     charts['Freight'] = heatMap(cf_data, 'FreightAnswer', 'qFreight', freightAnsMapping, freightQuestionMapping, 'Freight', 'row5', true, {colLength: 12, chartTitle: "How often do you receive deliveries at home for the following?"})
     charts['Improve'] = heatMap(cf_data, 'ImproveAnswer', 'qImprove', improveAnsMapping, improveQuestionMapping, 'Improve', 'row5', true, {colLength: 12, chartTitle: "How important are the following to you? ", marginsLeft: 300})
+    charts['Safe1'] = barChart(cf_data, 'qsafety1', 'Safe1', safeMapping, 'row6', true, 'key', true, {colLength: 6, chartTitle: 'How safe do you feel while walking in your neighborhood?'})
+    charts['Safe2'] = barChart(cf_data, 'qsafety2', 'Safe2', safeMapping, 'row6', true, 'key', true, {colLength: 6, chartTitle: 'How safe do you feel while walking in New York City in general?'})
 });
