@@ -1,6 +1,7 @@
 # Dashboard for Citywide Mobility Survey
 
 When we were conducting the initial exploratory analysis, we were overwhelmed by the number of dimensions this survey possessed. Therefore, we created this interactive dashboard for the convenience of: 
+
 1. **Exploration and Analysis:** Using this interactive dashboard speeds up our exploratory process of finding the trend and interactions between dimensions.
 2. **Reading and understanding:** Directly clicking on the graphs allows our readers to understand our analysis more intuitively and also makes the reading process more fun. They can also decide whether this survey reflects their transportation preferences by simply clicking on the choices.
 
