@@ -317,6 +317,7 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
             })
         .dimension(dimension)
         .group(quantity)
+        .ordinalColors(d3.schemeTableau10)
     pie.render();
     return pie;
 }
@@ -335,6 +336,7 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         .elasticY(true)
         .dimension(dimension)
         .group(quantity)
+        .ordinalColors(d3.schemeTableau10)
     if (ordering != false) {
         if (ordering == 'key') {
             chart.ordering(d => mapping.getKey(d.key));
