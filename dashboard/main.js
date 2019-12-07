@@ -279,7 +279,7 @@ function bindResetButton(chartID){
 function stickyTop(mode){
     let class_attr, a_href, a_text = undefined
     if (mode == 'stick') {
-        class_attr = 'sticky-top bg-white'
+        class_attr = 'sticky-top bg-light'
         a_href = 'javascript:stickyTop("unstick")'
         a_text = 'Unfreeze header pane'
     } else if (mode == 'unstick') {
