@@ -241,12 +241,12 @@ function createGraphDiv(chartID, divID, chartTitle=undefined, colLength=undefine
     let div = d3.select(`#${divID}`)
                 .append('div')
                 .attr("id", chartID)
-                .attr('class', `dc-chart col-sm-${colLength || 4}`); 
+                .attr('class', `dc-chart col-${colLength || 4}`); 
     div.append("strong")
         .text(chartTitle || chartID);
     d3.select(`#${chartID}`)
     .append('a')
-    .attr('class', 'reset float-sm-right')
+    .attr('class', 'reset float-right')
     .style('display', 'none')
     .text('reset');
     div.append('div')
@@ -372,20 +372,29 @@ function heatMap(cf_data, keyAccessorColumn, valueAccessorColumn, keyAccessorMap
 d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     dataCount(cf_data);
     charts['Preference'] = barChart(cf_data, 'Mode', "Preference", identicalMapping, 'preference', true, 'value', false, {colLength: 12, width: 1100, height: 250})
-    charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true, {colLength: 3});
-    charts['License'] = pieChart(cf_data, 'qlicense', 'License', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Driver License? "})
-    charts['Smartphone'] = pieChart(cf_data, 'qsmartphone', 'Smartphone', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Own Smartphone? "})
-    charts['Rent'] = pieChart(cf_data, 'qrent', 'Rent', binaryMapping, 'row0', true, {colLength: 3, chartTitle: "Rent (Yes) or Own (No) home? "})
-    charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0', true, false, true, {colLength: 6});
-    charts['Race'] = barChart(cf_data, 'qrace', 'Race', raceMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
+
+    charts['Gender'] = pieChart(cf_data, 'qgender', "Gender", genderMapping, 'row0', true, {colLength: 2});
+    charts['Age'] = barChart(cf_data, 'qage', 'Age', ageMapping, 'row0', true, false, true, {colLength: 5});
+    charts['Race'] = barChart(cf_data, 'qrace', 'Race', raceMapping, 'row0', true, 'key', true, {colLength: 5, width: 450});
+    
     charts['Education'] = barChart(cf_data, 'qeducation', 'Education', eduMapping, 'row1', true, 'key', true, {colLength: 6, width: 550});
+    charts['Married'] = barChart(cf_data, 'qmarried', 'Married', marriedMapping, 'row1', true, 'key', true, {chartTitle: "Marital Status"})
+
+    charts['Employment'] = barChart(cf_data, 'qemployment', 'Employment', employmentMapping, 'row2', true, 'key', true, {colLength: 6, width: 550})
     charts['Income'] = barChart(cf_data, 'qincome', 'Income', incMapping, 'row2', true, 'key', true, {colLength: 6, width: 550});
-    charts['Borough'] = pieChart(cf_data, 'borough', 'Borough', identicalMapping, 'row2', true, {colLength: 3})
-    charts['Employment'] = barChart(cf_data, 'qemployment', 'Employment', employmentMapping, 'row3', true, 'key', true, {colLength: 6, width: 550})
-    charts['TimeInNYC'] = barChart(cf_data, 'qnyc', 'TimeInNYC', timeInNYCMapping, 'row3', true, 'key', true, {colLength: 6, width: 550, chartTitle: "How long have you been living in NYC? "})
-    charts['Married'] = barChart(cf_data, 'qmarried', 'Married', marriedMapping, 'row4', true, 'key', true, {chartTitle: "Marital Status"})
-    charts['Freight'] = heatMap(cf_data, 'FreightAnswer', 'qFreight', freightAnsMapping, freightQuestionMapping, 'Freight', 'row5', true, {colLength: 12, chartTitle: "How often do you receive deliveries at home for the following?"})
-    charts['Improve'] = heatMap(cf_data, 'ImproveAnswer', 'qImprove', improveAnsMapping, improveQuestionMapping, 'Improve', 'row5', true, {colLength: 12, chartTitle: "How important are the following to you? ", marginsLeft: 300})
-    charts['Safe1'] = barChart(cf_data, 'qsafety1', 'Safe1', safeMapping, 'row6', true, 'key', true, {colLength: 6, chartTitle: 'How safe do you feel while walking in your neighborhood?'})
-    charts['Safe2'] = barChart(cf_data, 'qsafety2', 'Safe2', safeMapping, 'row6', true, 'key', true, {colLength: 6, chartTitle: 'How safe do you feel while walking in New York City in general?'})
+
+    charts['Borough'] = pieChart(cf_data, 'borough', 'Borough', identicalMapping, 'row3', true, {colLength: 3})
+    charts['TimeInNYC'] = barChart(cf_data, 'qnyc', 'TimeInNYC', timeInNYCMapping, 'row3', true, 'key', true, {colLength: 9, width: 800, chartTitle: "How long have you been living in NYC? "})
+
+    charts['License'] = pieChart(cf_data, 'qlicense', 'License', binaryMapping, 'row4', true, {colLength: 4, chartTitle: "Own Driver License? "})
+    charts['Smartphone'] = pieChart(cf_data, 'qsmartphone', 'Smartphone', binaryMapping, 'row4', true, {colLength: 4, chartTitle: "Own Smartphone? "})
+    charts['Rent'] = pieChart(cf_data, 'qrent', 'Rent', binaryMapping, 'row4', true, {colLength: 4, chartTitle: "Rent (Yes) or Own (No) home? "})
+
+    
+    charts['Safe1'] = barChart(cf_data, 'qsafety1', 'Safe1', safeMapping, 'row5', true, 'key', true, {colLength: 6, chartTitle: 'How safe do you feel while walking in your neighborhood?'})
+    charts['Safe2'] = barChart(cf_data, 'qsafety2', 'Safe2', safeMapping, 'row5', true, 'key', true, {colLength: 6, chartTitle: 'How safe do you feel while walking in New York City in general?'})
+
+
+    charts['Freight'] = heatMap(cf_data, 'FreightAnswer', 'qFreight', freightAnsMapping, freightQuestionMapping, 'Freight', 'row7', true, {colLength: 12, chartTitle: "How often do you receive deliveries at home for the following?"})
+    charts['Improve'] = heatMap(cf_data, 'ImproveAnswer', 'qImprove', improveAnsMapping, improveQuestionMapping, 'Improve', 'row7', true, {colLength: 12, chartTitle: "How important are the following to you? ", marginsLeft: 300})
 });
