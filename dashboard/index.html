@@ -13,7 +13,7 @@
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/3.1.5/dc.js"></script>
     </head>
 
-    <body onload='javascript:onload()'>
+    <body onload='javascript:onload()' class='bg-light'>
         <div class="container" id='loader'>
 
             <svg class="loader" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340">
@@ -25,19 +25,22 @@
             
         </div>
         <div class='container animate-bottom' style='display:none;' id='main'>
-            <div id='header' class='sticky-top bg-white'>
-                <h1 class='text-center'>
+            <div id='header' class='sticky-top bg-light mt-4 mb-4'>
+                <h1 class='text-center mb-4'>
                     Dashboard for Citywide Mobility Survey
                 </h1>
         
                 <p>
-                    [It's still under construction.]
-                    The purpose of this dashboard is: 
+                    When we were conducting the initial exploratory analysis, we were overwhelmed by the number of dimensions this survey possessed. Therefore, we created this interactive dashboard for the convenience of: 
+                    <ol>
+                        <li><strong>Exploration and Analysis:</strong> Using this interactive dashboard speeds up our exploratory process of finding the trend and interactions between dimensions. </li>
+                        <li><strong>Reading and understanding:</strong> Directly clicking on the graphs allows our readers to understand our analysis more intuitively and also makes the reading process more fun. They can also decide whether this survey reflects their transportation preferences by simply clicking on the choices. </li>
+                    </ol>
                 </p>
         
                 <div class='row' id="preference"></div>
                 <div class='row'>
-                    <div class='dc-data-count dc-chart' id='reset-all'>Please click on the graph to apply filters. </div>
+                    <div class='dc-data-count dc-chart' id='reset-all'>Please click on the graphs to apply filters. </div>
                 </div>
                 <div class='row'>
                     <a id='stickButton' href="javascript:stickyTop('unstick')" class='float-right'>Unfreeze header pane</a>
