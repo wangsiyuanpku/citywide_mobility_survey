@@ -315,7 +315,7 @@ function barChart(cf_data, dimensionColumn, barChartID, mapping=identicalMapping
         .width(barChartParameters['width']||500)
         .height(barChartParameters['height']||200)
         .barPadding(0.1)
-        .x(d3.scaleOrdinal())
+        .x(d3.scaleBand())
         .xUnits(dc.units.ordinal)
         .margins({left: 50, right: 30, top: 0, bottom: 40})
         .elasticY(true)
