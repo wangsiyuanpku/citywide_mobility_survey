@@ -312,7 +312,7 @@ function pieChart(cf_data, dimensionColumn, pieChartID, mapping=identicalMapping
         .width(180)
         .height(180)
         .innerRadius(pieChartParameters['innerRadius'] || 0)
-        .label(function(d) {
+        .label(pieChartParameters['label'] || function(d) {
                     return d.key + ': ' + parseInt(d.value); 
             })
         .dimension(dimension)
@@ -399,7 +399,7 @@ d3.json(data_loc).then(crossfilter).then((cf_data)=>{
     charts['Employment'] = barChart(cf_data, 'qemployment', 'Employment', employmentMapping, 'row2', true, 'key', true, {colLength: 6, width: 550})
     charts['Income'] = barChart(cf_data, 'qincome', 'Income', incMapping, 'row2', true, 'key', true, {colLength: 6, width: 550});
 
-    charts['Borough'] = pieChart(cf_data, 'borough', 'Borough', identicalMapping, 'row3', true, {colLength: 3})
+    charts['Borough'] = pieChart(cf_data, 'borough', 'Borough', identicalMapping, 'row3', true, {colLength: 3, label: d=>d.key})
     charts['TimeInNYC'] = barChart(cf_data, 'qnyc', 'TimeInNYC', timeInNYCMapping, 'row3', true, 'key', true, {colLength: 9, width: 800, chartTitle: "How long have you been living in NYC? "})
 
     charts['License'] = pieChart(cf_data, 'qlicense', 'License', binaryMapping, 'row4', true, {colLength: 4, chartTitle: "Own Driver License? "})
