@@ -283,7 +283,7 @@ function stickyTop(mode){
         a_href = 'javascript:stickyTop("unstick")'
         a_text = 'Unfreeze header pane'
     } else if (mode == 'unstick') {
-        class_attr = ''
+        class_attr = 'bg-light'
         a_href = 'javascript:stickyTop("stick")'
         a_text = 'Freeze header pane'
     }
