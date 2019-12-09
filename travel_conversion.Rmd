@@ -1,10 +1,5 @@
----
-title: "travel_conversion"
-author: "Chao Huang"
-output: html_document
----
-
-```{r setup, include=FALSE}
+# Travel Conversion
+```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
