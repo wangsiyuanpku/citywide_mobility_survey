@@ -1,0 +1,185 @@
+---
+title: "travel_conversion"
+author: "Chao Huang"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+```
+
+## Conversion from other transportation to ride-hail services
+
+```{r}
+load("./data/tidy_survey_data.rda") # load data as survey data
+
+tidy_survey <- tidy_survey %>% filter(!is.na(UniqueID))
+```
+
+```{r}
+total_cnt <- sum(tidy_survey$allwt)
+total_cnt
+```
+
+```{r}
+freq_df <- data.frame(
+  freq_index = 1:8,
+  freq_value = c("Several times a week",
+                  "Once a week",
+                  "A few times a month",
+                  "Once a month",
+                  "A few times a year",
+                  "Less than a few times a year",
+                  "Don’t know / Refused",
+                  "Don’t know / Refused"))
+
+freq_df$freq_value = fct_reorder(freq_df$freq_value, freq_df$freq_index, .desc = T)
+```
+
+```{r}
+ride_hail_users <- tidy_survey %>% 
+  select(c(UniqueID, qridehail_freq, allwt)) %>% 
+  filter(qridehail_freq > 0) %>% 
+  mutate(freq_index = qridehail_freq) %>% 
+  merge(freq_df, by = "freq_index") %>% 
+  select(c(UniqueID, allwt, freq_value))
+```
+
+```{r}
+user_count <- sum(ride_hail_users$allwt)
+user_count / total_cnt
+```
+
+## Plot percentage of frequency
+
+```{r}
+group_by_freq = ride_hail_users %>% group_by(freq_value) %>% 
+  summarise(percentage=sum(allwt) / user_count) %>% 
+  ungroup()
+```
+
+
+```{r}
+ggplot(data = group_by_freq, aes(x=fct_inorder(freq_value), y=percentage)) + 
+  geom_col() + 
+  coord_flip()
+```
+
+
+## Transportation before ride-hail services
+
+```{r}
+before_ride_hail <- tidy_survey %>% select(c(UniqueID, "Prior to Riding Hail", allwt)) %>% 
+  rename("previous_travel"="Prior to Riding Hail") %>% 
+  mutate(length=lengths(previous_travel)) %>%
+  filter(length > 0) %>% 
+  mutate(avgwt = allwt / length) %>% 
+  select(c(UniqueID, avgwt, previous_travel)) %>% 
+  unnest(previous_travel) %>% 
+  group_by(previous_travel) %>% 
+  summarise(wt=sum(avgwt))
+```
+
+```{r}
+before_ride_hail_groups <- before_ride_hail %>% 
+  # merge(travel_groups, by.x = "previous_travel", by.y = "travel_code") %>% 
+  mutate(group_code=fct_collapse(previous_travel, 
+                                 `Car Services`=c("Carpool", "Car service", "Carshare"),
+                                 `Bike / Motorcycle`=c("Citi Bike", "Electric Bike", "Motorcycle", 
+                                                       "Personal bicycle"),
+                                 Bus=c("Community van/ dollar van", "Express bus", "Local bus",  
+                                       "Paratransit/ Access-a-Ride", "Select bus service"),
+                                 Train=c("Commuter rail","PATH train"),
+                                 `Don't know / Other`=c("Don’t know", "Other"),
+                                 Taxi=c("Green taxi", "Yellow taxi"),
+                                 Ferry=c("Staten Island feryy", "Other ferry")
+                                 )) %>% 
+  group_by(group_code) %>% 
+  summarise(wt=sum(wt)) %>%
+  mutate(percentage=wt/sum(wt))
+```
+
+```{r}
+ggplot(before_ride_hail_groups, aes(x=fct_reorder(group_code, wt), y=percentage)) + 
+  geom_col() + 
+  coord_flip()
+```
+
+## Reasons to use ride-hail services
+
+```{r}
+reasons_ride_hail <- tidy_survey %>% select(c(UniqueID, Description)) %>% 
+  merge(ride_hail_users, by = "UniqueID") %>% 
+  unnest(Description) %>% 
+  filter(str_detect(Description, coll("Ride-hail"))) %>% 
+  mutate(reason=str_remove(Description, coll("Ride-hail services (i.e. Uber or Lyft) "))) %>% 
+  select(c(UniqueID, allwt, reason))
+```
+
+```{r}
+reasons_group <- reasons_ride_hail %>% 
+  group_by(UniqueID) %>% 
+  mutate(cnt=n()) %>% 
+  mutate(avgwt=allwt / cnt) %>% 
+  ungroup() %>% 
+  mutate(reason=fct_collapse(reason, `Don't know / Refused`=c("Don't know", "Refused"))) %>% 
+  group_by(reason) %>% 
+  summarise(wt=sum(avgwt)) %>% 
+  mutate(wt=wt / sum(wt))
+```
+
+```{r}
+ggplot(reasons_group, aes(x=fct_reorder(reason, wt), y=wt)) + 
+  geom_col() +
+  coord_flip()
+```
+
+## Ride hail app usage
+
+```{r}
+app_usage <- tidy_survey %>% 
+  select(c(UniqueID, "Ride Hail Services")) %>% 
+  merge(ride_hail_users) %>% 
+  mutate(length=lengths(`Ride Hail Services`)) %>% 
+  mutate(avgwt=allwt/length) %>% 
+  rename("Services"="Ride Hail Services") %>% 
+  select(UniqueID, avgwt, Services) %>% 
+  unnest(Services) %>%
+  group_by(Services) %>%
+  summarise(wt=sum(avgwt)) %>% 
+  mutate(wt=wt / sum(wt))
+```
+
+```{r}
+ggplot(app_usage, aes(x=fct_reorder(Services, wt, .desc=T), y=wt)) +
+  geom_col()
+```
+
+## Ride hail purposes
+
+```{r}
+purposes <- tidy_survey %>% 
+  select(c(UniqueID, "Purpose of using ride hailing app")) %>% 
+  merge(ride_hail_users) %>% 
+  rename(purpose="Purpose of using ride hailing app") %>% 
+  mutate(length=lengths(purpose)) %>% 
+  mutate(avgwt=allwt/length) %>% 
+  select(c(UniqueID, avgwt, purpose)) %>% 
+  unnest(purpose) %>% 
+  mutate(purpose=fct_collapse(purpose, Others=c("Other", "Don't know", "Refused"))) %>% 
+  group_by(purpose) %>% 
+  summarise(wt=sum(avgwt)) %>% 
+  mutate(wt=wt/sum(wt))
+```
+
+```{r}
+ggplot(purposes, aes(x=fct_reorder(purpose, wt), y=wt)) +
+  geom_col() +
+  coord_flip()
+```
+
