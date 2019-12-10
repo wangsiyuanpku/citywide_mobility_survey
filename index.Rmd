@@ -11,4 +11,16 @@ description: "This book holds the EDAV final project for Group 3, Fall 2019, Col
 
 # (PART) Introduction {-}
 
-# Introduction {-}
+# Introduction
+
+What's your mode choice if you're going to get around the New York City? Think about it and give us your answer. 
+
+New York City is famous for its transportation system, a network of complex infrastructural systems, including one of the largest subway systems in the world and some other transportation modes, such as bus, car, train and ferry. Also, the traffic status is continuously improved, expecially after the launch of the Second Avenue Subway (source: New York City Mobility Report, 2018). Due to this, New York City residents have a lot of mode choices when they're out for work, traveling, picking up children, etc. 
+
+But how will they decide? Back to our question proposed at the beginning, which mode you will choose to get around the New York City. You may not realize that the choice you came up with was actually the result getting after taking several factors into consideration, both sujective and objective. We are interested in identifying these factors, which drive transportation choices for New York City residents, and comparing the differences between the residents compostion in different mode choices in New York City. Also, we would like to find out the reasons causing different choices by exploratory visualization, solving some real-world problems.
+
+In 2017, NYC DOT launched a citywide mobility survey, a phone and online questionnaire that was taken by thousands of New Yorkers across all five boroughs. This survey assessed the residents' behaviors, as well as their attitudes and perceptions towards transportation throughout New York City, which makes it possible for us to solve the questions concerning us. The sample size of this survey is 3,603 and it targets the residents above 18 years old, among which 1,801 respondents are sampled from New York City general population via random digit dialing (RDD) and the rest are oversampled across 10 designated survey zones, which cannot be reached by phone. In order to guarantee the respresentativeness of the sample, phone survey data is weighted to 5 year American Community Survey (ASC) averages for New York City across age, gender, educational attainment, race and borough.
+ 
+
+
+
