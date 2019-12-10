@@ -31,34 +31,8 @@ theme_user <- function(total_size, title_size, subtitle_size) {
 }
 ```
 
-## Feature of Residents Choosing Different Transportation Modes
 
-First, we plot a parallel coordinates plot to get an idea of our dataset. The lines are colored by transportation modes. By changing the position of each categorical variable, we can notice that each of the transportation mode are composed of almost all kinds of residents and the difference may be the proportion of each kind of residents in the tranportation mode. So, we will focus on the influence of each feature on the composition of transportation modes in the following analysis.
-
-```{r, echo=FALSE}
-travel_mode <- df_travel[c(1, 5:12)]
-traveler <- df_general[c(1:6)]  
-
-total <- merge(travel_mode, traveler, by = "UniqueID", all = TRUE) %>%
-  filter(qgender %in% c(1, 2), qage <= 100)
-
-total <- total %>%
-  gather(key = 'Mode', value = "Number", -c(1, 10:14)) 
-
-total <- subset(total, select = c("qgender", "qage", "qrace", "qeducation", "qincome", "Mode"))
-colnames(total) <- c("Gender", "Age", "Race", "Education", "Income", "Mode")
-total['Gender'] <- factor(total$Gender)
-
-total %>% 
-  parcoords(rownames = FALSE,
-            brushMode = "1D-axes", 
-            reorderable = TRUE,
-            color = list(colorBy = "Mode",
-                         colorScale = "scaleOrdinal",
-                         colorScheme = "schemeCategory10"),
-            withD3 = TRUE,
-            alpha = 0.4)
-```
+## 5.1 Is there any difference between the gender composition in each transportation mode?
 
 We plot a stacked bar chart for each feature. First of all, we can see that gender, age and income all have influence on the composition of the transportation modes. More specifically, the majority of the residents who willing to ride a bicycle to get around the city are males, around 18-54 years old, and most of them have an income ranging from \$50,000 to \$149,999. Bus, for-hire vehicle and walk are prefered by female residents. In addition, compared with bicycle, other transportation modes are prefered by a relative high proportion of people over 55 years old. Also, a higher proportion of people whose income is higher than 150,000 love to get around the city using bicycle, car and for-hire vehicle when compared with bus, ferry and subway. The majority of residents that prefer taking train are around 25-64 years old.
 
