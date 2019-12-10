@@ -1,9 +1,18 @@
 # Data Sources
 
-Describe the data sources: who is responsible for collecting the data? How is it collected? If there were a choice of options, explain how you chose.
 
-Provide some basic information about the dataset: types of variables, number of records, etc.
+## Background of Citywide Mobility Survey
 
-Describe any known issues / problems about the data.
+Department of Transportation in New York City conducts an annual travel survey called Citywide Mobility Survey, seeking to assess the travel behavior, preferences, and attitudes of residents of the city. It collaborates with PSB, an independent market research team to conduct the survey and collect the data. The survey was both conducted over the phone and on the Internet. We used 2017 data as it is the latest publicly available data. 
 
-(You should be able to write this section without actually working with the data.)
+The survey was divided into two parts: the main survey which assessed the behaviors, attitudes, and perceptions of transportation throughout New York City, and the trip diary which recorded each trip that respondents had taken the previous day. In our analysis, we will focus on the main survey as it directly involved many topics that we are interested in and addressed our questions. 
+
+## Basic Information of the dataset
+
+A total of 3,603 NYC residents took part in the survey. There were 38 questions in total, some of which may had more than one answer (the original questionnaire can be accessed [here](https://data.cityofnewyork.us/api/views/dd6w-hnq9/files/7431f0a7-abd1-419b-a3b3-7a16580371d0?download=true&filename=Open_Data_Dictionary_Main_Survey.xlsx)). The data provider has chosen to represent these questions in a one-hot manner, causing the dataset to have 454 variables. Considering the nature of questionnaries, most of the variables are factors, and they were encoded by the data provider (how each variable is encoded can be accessed [here](https://data.cityofnewyork.us/api/views/dd6w-hnq9/files/7431f0a7-abd1-419b-a3b3-7a16580371d0?download=true&filename=Open_Data_Dictionary_Main_Survey.xlsx)). 
+
+One variable that worth mentioning is `allwt`, which makes adjustments on the weight of each respondent considering his or her representativeness of the NYC population based on the respondent's race, age, gender, education level and the borough he or she lives. In the following analysis, unless specifically claimed, we use the sum of `allwt` instead of the count of records to better reflect the trend of transportation preferences. 
+
+## References
+1. To learn more about the setting of this survey, you can visit [the official website](https://www1.nyc.gov/html/dot/html/about/citywide-mobility-survey.shtml) for more information; 
+2. To access the data, you can visit [NYC Open Data](https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9) to download. 
