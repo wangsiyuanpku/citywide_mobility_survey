@@ -23,9 +23,13 @@ Report will be hosted at [https://skyetim.github.io/citywide_mobility_survey/](h
 
 ### Phase 3
 #### Interactive graph
-- [ ] data cleansing and feature selection
+- [x] data cleansing and feature selection
 - [x] `reset` button
-- [ ] beautify the page: color
-- [ ] beautify the page: CSS
+- [x] beautify the page: color
+- [x] beautify the page: CSS
 - [x] travis setup
-- [ ] embed in bookdown
+- [x] embed in bookdown
+
+### Phase 4
+- [ ] guidance on how to use the interactive graphs
+- [ ] put data under `data/raw` and `data/clean` as requested. data cleansing scripts under `preprocessing` folder
