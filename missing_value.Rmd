@@ -1,0 +1,4 @@
+# Missing Value
+
+Describe any patterns you discover in missing values.
+

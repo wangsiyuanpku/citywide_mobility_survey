@@ -1,4 +1,4 @@
-# Dashboard for Citywide Mobility Survey
+# Interactive Component: A dashboard for EDA
 
 When we were conducting the initial exploratory analysis, we were overwhelmed by the number of dimensions this survey possessed. Therefore, we created this interactive dashboard for the convenience of: 
 
