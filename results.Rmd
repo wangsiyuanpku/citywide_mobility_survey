@@ -35,11 +35,10 @@ theme_user <- function(total_size, title_size, subtitle_size, angle) {
 
 ## 5.1 Is there any differences between the gender composition in each transportation mode?
 
-Remove the records which are "Don't know" or "Refused" in Gender and calculate the proportion of the respondents with different gender. There are totally 41.16% males and 58.84% females among all the respondents.
+Calculate the proportion of the respondents with different gender. There are totally 41.12% males and 58.77% females among all the respondents.
 
 ```{r}
-traveler_gender <- df_general[c(1:2, 31)] %>%
-  filter(qgender %in% c(1, 2))
+traveler_gender <- df_general[c(1:2, 31)]
 
 traveler_gender['gender'] <- factor(traveler_gender$qgender)
 
@@ -48,25 +47,26 @@ traveler_gender %>%
   summarise(num = sum(allwt)) %>%
   ungroup() %>%
   mutate(prop = num / sum(num)) %>% 
-  ggplot(aes(gender, prop)) +
+  ggplot(aes(reorder(gender, -prop), prop)) +
   geom_col() +
   labs(x = 'Gender', y = 'Count', title = "Propotion of Male and Female Respondents", 
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_wsj() +
-  scale_x_discrete(labels=c("1" = "Male", "2" = "Female")) +
+  scale_x_discrete(labels=c("1" = "Male", "2" = "Female", "3" = "Don't know", "4" = "Refused")) +
   theme_user(16, 16, 12, 0)
 ```
 
-We plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. We can easily notice that the gender composition among different transportation modes are different, expecially between bicycle and the other modes. Almost 70% residents that prefer riding a bicyle to get around the city are males, greatly beyond the number of females. On the contrary, less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
+After removing the records which are "Don't know" or "Refused" in Gender, we plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. We can easily notice that the gender composition among different transportation modes are different, expecially between bicycle and the other modes. Almost 70% residents that prefer riding a bicyle to get around the city are males, greatly beyond the number of females. On the contrary, less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
 
-It may be because females do not think riding bicycle is safe enough in New York City, or males want to make use of their spare time to take exercise, for which riding bicycle is a good idea. 
+In order to interpret the huge difference between the number of males and females prefering bicycle, we propose several possible reasons. It may be because females do not think riding bicycle is safe enough in New York City due to the high crime rate, or males want to make use of their spare time to take exercise, for which riding bicycle is a good idea. We can further verify our assumptions by exploring the question in the questionaire, "Which of the following words most apply to Bicycling?".   
 
 ```{r, echo=FALSE}
 # Transportation mode ~ Gender
-traveler_gender1 <- traveler_gender[c(1, 4)]
+traveler_gender1 <- traveler_gender[c(1, 4)] %>%
+  filter(gender %in% c(1, 2))
 travel_mode <- df_travel[c(1, 5:12)]
 
-df1 <- merge(travel_mode, traveler_gender1, by = "UniqueID", all.u = TRUE) %>%
+df1 <- merge(travel_mode, traveler_gender1, by = "UniqueID", all.y = TRUE) %>%
   gather(key = 'Mode', value = "Number", -c(1, 10)) %>%
   merge(weight, by = "UniqueID", all = TRUE) %>%
   mutate(Count = weight_fill * Number) %>%
@@ -76,16 +76,19 @@ df1 <- merge(travel_mode, traveler_gender1, by = "UniqueID", all.u = TRUE) %>%
   group_by(Mode) %>%
   mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
   ungroup()
-
+df1
 ggplot(df1, aes(reorder(Mode, -Order), Sum, fill = gender)) +
   geom_bar(stat="identity", position = "fill") + 
-  labs(x = 'Transportation Mode', y = 'Proportion', caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  labs(x = 'Transportation Mode', y = 'Proportion', title = "Gender Composition in Transportation Mode",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_wsj() +
   scale_fill_brewer(palette = "Set2", name = "Gender", labels = c("Male", "Female")) +
   theme_user(16, 16, 12, 45)
 ```
 
 ```{r}
+library(ggmosaic)
+
 survey <- read.csv("data/raw_survey_data.csv")
 
 survey <- survey %>%
@@ -93,95 +96,36 @@ survey <- survey %>%
                     "gFOCUSAA1_qFOCUSAA6_mA3", "gFOCUSAA1_qFOCUSAA6_mA4",
                     "gFOCUSAA1_qFOCUSAA6_mA5", "gFOCUSAA1_qFOCUSAA6_mA6",
                     "gFOCUSAA1_qFOCUSAA6_mA7", "gFOCUSAA1_qFOCUSAA6_mA8", "allwt"))
+
 colnames(survey) <- c("UniqueID", "Gender", "Convenient", "Reliable", 
                       "Fast", "Inexpensive", "Safe", "Comfortable","Don't know", "Refused", "allwt")
-survey['Gender'] <- factor(survey$Gender)
-survey_1 <- merge(travel_mode,survey, by = "UniqueID", all = TRUE) %>%
-  filter(Bicycle == 0 & Gender %in% c(1, 2)) %>%  # Only forcus on those did not choose bicycle
-  subset(select = c(1, 10:19)) %>%
-  gather(key = "Description", value = "num", -c(1:2, 11)) %>%
-  mutate(Count = allwt * num) %>%
-  group_by(Description, Gender) %>%
-  summarise(Sum = sum(Count)) %>%
-  ungroup() %>%
-  group_by(Description) %>%
-  mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
+
+survey$Safe[survey$Safe == "0"] <- "No"
+survey$Safe[survey$Safe == "1"] <- "Yes"
+survey$Gender[survey$Gender == '1'] <- "Male"
+survey$Gender[survey$Gender == '2'] <- "Female"
+survey$Gender[survey$Gender == '3'] <- "Don't know"
+survey$Gender[survey$Gender == '4'] <- "Refused"
+
+survey['Gender'] <- factor(survey$Gender, levels = c("Male", "Female", "Don't know", "Refused"))
+survey['Safe'] <- factor(survey$Safe)
+survey_1 <- merge(travel_mode, survey, by = "UniqueID", all.x = TRUE) %>%
+  filter(Bicycle == 0) %>%  # Only forcus on those did not choose bicycle
+  subset(select = c(1, 10, 15, 19)) %>%
+  group_by(Safe, Gender) %>%
+  summarise(Count = sum(allwt)) %>%
   ungroup()
 
-ggplot(survey_1, aes(reorder(Description, -Order), Sum, fill = Gender)) +
-  geom_bar(stat="identity", position = "fill") + 
-  labs(x = 'Transportation Mode', y = 'Proportion', caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
-  theme_wsj() +
-  scale_fill_brewer(palette = "Set2", name = "Gender", labels = c("Male", "Female")) +
-  theme_user(16, 16, 12, 45)
+
+ggplot(survey_1) +
+   geom_mosaic(aes(x = product(Gender, Safe), fill = Gender, weight = Count), offset = 0.028) + 
+   labs(x = 'Safe', y = 'Gender', title = "Proportion of Males and Females with Different Answers",
+        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+   scale_fill_brewer(palette = "Set2") +
+   theme_wsj() +
+   theme_user(14, 14, 12, 0) + 
+   theme(legend.position = "none")
 ```
 
 
 
-
-
-```{r, echo=FALSE}
-# Transportation mode ~ Age
-traveler_age <- df_general[c(1, 3)]  
-df2 <- merge(travel_mode, traveler_age, by = "UniqueID", all = TRUE) %>%
-  merge(weight, by = "UniqueID", all = TRUE)
-
-df2$Age <- cut(df2$qage, breaks = c(17, 24, 54, 64, 100, 1999), 
-               labels=c("18-24","25-54", 
-                        "55-64", ">65", "Refused"))
-
-df2['Age'] <- factor(df2$Age, 
-                     levels = c("18-24","25-54", 
-                                "55-64", ">65", "Refused"))
-df2 <- df2 %>%
-  gather(key = 'Mode', value = "Number", -c(1:2, 11:13)) %>%
-  mutate(Count = Number * Weight)
-
-custom.col <- c("#FFDB6D", "#C4961A", "#F4EDCA", 
-                "#D16103", "#C3D7A4", "#52854C", "#4E84C4", "#293352",
-                "wheat3", "wheat4", "steelblue3")
-
-ggplot(df2, aes(Mode, Count, fill = Age)) +
-  geom_bar(stat="identity", position = "fill") + 
-  ylab('Proportion') + 
-  labs(x = 'Transportation Mode', y = 'Proportion', caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
-  scale_fill_brewer(palette = "Set2") +
-  theme_user(15, 12, 12)
-```
-
-
-```{r, echo=FALSE}
-# Transportation mode ~ Income
-traveler_income <- df_general[c(1, 6)] 
-df4 <- merge(travel_mode, traveler_income, by = "UniqueID", all = TRUE) %>%
-  merge(weight, by = "UniqueID", all = TRUE)
-
-df4$qincome[df4$qincome %in% c(1, 2)] <- "Less than $24,999"
-df4$qincome[df4$qincome %in% c(3, 4)] <- "$25,000 - $49,999"
-df4$qincome[df4$qincome %in% c(5, 6)] <- "$50,000 - $99,999"
-df4$qincome[df4$qincome %in% c(7)] <- "$100,000 - $149,999"
-df4$qincome[df4$qincome %in% c(8, 9)] <- "$150,000 and above"
-df4$qincome[df4$qincome %in% c(10, 11)] <- "Other"
-
-df4['Income'] <- factor(df4$qincome, 
-                     levels = c("Less than $24,999", "$25,000 - $49,999", "$50,000 - $99,999", 
-                                "$100,000 - $149,999", "$150,000 and above", "Other"))
-
-df4$Income[df4$Income %in% c(1, 2)] <- "Less than $24,999"
-df4$Income[df4$Income %in% c(3, 4)] <- "$25,000 - $49,999"
-df4$Income[df4$Income %in% c(8, 9)] <- "$150,000 and above"
-
-df4 <- df4 %>%
-  gather(key = 'Mode', value = "Number", -c(1:2, 11:13)) %>%
-  mutate(Count = Weight * Number)
-
-ggplot(df4, aes(Mode, Count, fill = Income)) +
-  geom_col(position  = "fill") + 
-  ylab('Proportion') + 
-  labs(x = 'Transportation Mode', y = 'Proportion', caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
-  scale_fill_brewer(palette = "Set2", name = "Income") +
-  theme_user(15, 12, 12)
-```
-
-
-We plot a stacked bar chart for each feature. First of all, we can see that gender, age and income all have influence on the composition of the transportation modes. More specifically, the majority of the residents who willing to ride a bicycle to get around the city are males, around 18-54 years old, and most of them have an income ranging from \$50,000 to \$149,999. Bus, for-hire vehicle and walk are prefered by female residents. In addition, compared with bicycle, other transportation modes are prefered by a relative high proportion of people over 55 years old. Also, a higher proportion of people whose income is higher than 150,000 love to get around the city using bicycle, car and for-hire vehicle when compared with bus, ferry and subway. The majority of residents that prefer taking train are around 25-64 years old.
