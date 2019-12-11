@@ -54,7 +54,7 @@ traveler_gender %>%
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_wsj() +
   scale_x_discrete(labels=c("1" = "Male", "2" = "Female", "3" = "Don't know", "4" = "Refused")) +
-  theme_user(16, 16, 12, 0)
+  theme_user(15, 14, 12, 0)
 ```
 
 After removing the records which are "Don't know" or "Refused" in Gender, we plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. Note that if there's no difference between the gender composition of each transportation mode, then the line separates male and female should be on the same level. 
@@ -79,14 +79,14 @@ df1 <- merge(travel_mode, traveler_gender1, by = "UniqueID", all.y = TRUE) %>%
   group_by(Mode) %>%
   mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
   ungroup()
-df1
+
 ggplot(df1, aes(reorder(Mode, -Order), Sum, fill = gender)) +
   geom_bar(stat="identity", position = "fill") + 
-  labs(x = 'Transportation Mode', y = 'Proportion', title = "Gender Composition in Transportation Mode",
+  labs(x = 'Transportation Mode', y = 'Proportion', title = "Gender Composition",
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_wsj() +
   scale_fill_brewer(palette = "Set2", name = "Gender", labels = c("Male", "Female")) +
-  theme_user(16, 16, 12, 45)
+  theme_user(15, 14, 12, 45)
 ```
 
 Visualize respondents' description of bicycling via Cleverland dot plot faceted by gender. We separate respondents into two groups, prefering bicycling and not prefering bicycling. For those would like to ride a bicycle to get around the city, both females and males, the majority of them think bicycling is not only inexpensive but also convenient. However, for those not prefering bicycling, the main reason for they rejecting to ride a bicycling to get around the city is that they think it's not safe enough in New York City. By further exploring, we notice that the order of the reasons for prefering or not prefering riding a bicycle are the same for male and female residents, but the gender composition in Bicycling shows that more males than females chose this mode. The possible interpretation is that what males are concerned about most is different from that of females. Comparing safety with cost as well as comfort level, males value the latter more. On the contrary, females may be concerned about safety most, which is consistent with our guess.
@@ -94,20 +94,20 @@ Visualize respondents' description of bicycling via Cleverland dot plot faceted 
 ```{r}
 survey <- read.csv("data/raw_survey_data.csv")
 
-survey <- survey %>%
+Survey <- survey %>%
   filter(!is.na(qgender) & qgender %in% c(1, 2)) %>%
   subset(select = c("UniqueID", "qgender", "gFOCUSAA1_qFOCUSAA6_mA1", "gFOCUSAA1_qFOCUSAA6_mA2", 
                     "gFOCUSAA1_qFOCUSAA6_mA3", "gFOCUSAA1_qFOCUSAA6_mA4",
                     "gFOCUSAA1_qFOCUSAA6_mA5", "gFOCUSAA1_qFOCUSAA6_mA6",
                     "gFOCUSAA1_qFOCUSAA6_mA7", "gFOCUSAA1_qFOCUSAA6_mA8", "allwt"))
 
-colnames(survey) <- c("UniqueID", "Gender", "Convenient", "Reliable", 
+colnames(Survey) <- c("UniqueID", "Gender", "Convenient", "Reliable", 
                       "Fast", "Inexpensive", "Safe", "Comfortable","Don't know", "Refused", "allwt")
 
-survey$Gender[survey$Gender == '1'] <- "Male"
-survey$Gender[survey$Gender == '2'] <- "Female"
+Survey$Gender[Survey$Gender == '1'] <- "Male"
+Survey$Gender[Survey$Gender == '2'] <- "Female"
 
-survey_1 <- merge(travel_mode, survey, by = "UniqueID", all.y = TRUE) %>%
+survey_1 <- merge(travel_mode, Survey, by = "UniqueID", all.y = TRUE) %>%
   filter(Bicycle == 0) %>%  # Only forcus on those did not choose bicycle
   subset(select = c(1, 10:19)) %>%
   gather(key = "Description", value = "Choice", -c(1:2, 11)) %>%
@@ -129,7 +129,7 @@ ggplot(survey_1, aes(x = Prop, y = reorder(Description, -Order), color = factor(
   theme_user(15, 14, 12, 0)
 
 
-survey_2 <- merge(travel_mode, survey, by = "UniqueID", all.y = TRUE) %>%
+survey_2 <- merge(travel_mode, Survey, by = "UniqueID", all.y = TRUE) %>%
   filter(Bicycle == 1) %>%  # Only forcus on those did not choose bicycle
   subset(select = c(1, 10:19)) %>%
   gather(key = "Description", value = "Choice", -c(1:2, 11)) %>%
@@ -140,7 +140,7 @@ survey_2 <- merge(travel_mode, survey, by = "UniqueID", all.y = TRUE) %>%
   mutate(Prop = Num / sum(Num), Order = first(Prop)) %>%
   ungroup()
 
- #Description of Bicycling from Residents Who Prefer Bicycling
+# Description of Bicycling from Residents Who Prefer Bicycling
 ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order), color = factor(Choice))) +
   geom_point(size = 1.8) +
   facet_grid(Gender~.) +
@@ -154,4 +154,239 @@ ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order), color = factor(
 
 ## 5.2 Is there any differences between the income composition of the residents choosing different transportation modes?
 
+We are also interested in the possible relationship between resident's income and their mode choices. First we plot a bar chart in terms of income to quick learn about the proportion of respondents with different income. According to our interest, we recombine the income into 4 categories, which are "\$100,000 and above", "\$25,000 - \$99,999", "Less than \$24,999" and "Other". Almost half of the respondents have a year's income between $25,000 and \$99,999 and the proportions of residents with less than \$24,999 in come and those with more than \$100,000 income are roughly equal.
+
+```{r}
+traveler_income <- df_general[c(1, 6, 31)]
+traveler_income$qincome[traveler_income$qincome %in% c(1, 2)] <- "Less than $24,999"
+traveler_income$qincome[traveler_income$qincome %in% c(3, 4, 5, 6)] <- "$25,000 - $99,999"
+traveler_income$qincome[traveler_income$qincome %in% c(7, 8, 9)] <- "$100,000 and above"
+traveler_income$qincome[traveler_income$qincome %in% c(10, 11)] <- "Other"
+
+traveler_income['qincome'] <- factor(traveler_income$qincome, 
+                                     levels = c("$100,000 and above", 
+                                                "$25,000 - $99,999", 
+                                                "Less than $24,999", 
+                                                "Other"))
+
+traveler_income %>%
+  group_by(qincome) %>%
+  summarise(num = sum(allwt)) %>%
+  ungroup() %>%
+  mutate(prop = num / sum(num)) %>% 
+  ggplot(aes(qincome, prop)) +
+  geom_col() +
+  labs(x = 'Income', y = 'Count', title = "Propotion of Respondents with Different Income", 
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_wsj() +
+  theme_user(15, 14, 12, 0)
+```
+
+Then we plot a stacked bar chart to compare the income composition between different modes. The most obvious differences include 1) the residents whose income higher than \$100,000 prefer bicycling and car more than other thansportation modes and the proportions of these two choices are roughly equal, 2) compared with other modes, the residents choosing walking and taking bus or subway are composed by more people with lower than \$24,999 income. Also, the respondents whose income are between \$25,000 and \$99,999 take a large proportion in those loving train and rail. 
+
+```{r}
+# Transportation mode ~ Income
+traveler_income <- df_general[c(1, 6)] 
+income <- merge(travel_mode, traveler_income, by = "UniqueID", all.y = TRUE) %>%
+  gather(key = 'Mode', value = "Number", -c(1, 10)) %>%
+  merge(weight, by = "UniqueID", all.y = TRUE) %>%
+  mutate(Count = weight_fill * Number) 
+
+income$qincome[income$qincome %in% c(1, 2)] <- "Less than $24,999"
+income$qincome[income$qincome %in% c(3, 4, 5, 6)] <- "$25,000 - $99,999"
+income$qincome[income$qincome %in% c(7, 8, 9)] <- "$100,000 and above"
+income$qincome[income$qincome %in% c(10, 11)] <- "Other"
+
+income['qincome'] <- factor(income$qincome, 
+                        levels = c("Other", "Less than $24,999", "$25,000 - $99,999", "$100,000 and above"))
+
+income <- income %>%
+  group_by(Mode, qincome) %>%
+  summarise(Sum = sum(Count)) %>%
+  ungroup() %>%
+  group_by(Mode) %>%
+  mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
+  ungroup()
+
+ggplot(income, aes(reorder(Mode, -Order), Sum, fill = qincome)) +
+  geom_bar(stat="identity", position = "fill") + 
+  labs(x = 'Transportation Mode', y = 'Proportion', title = "Income Composition",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_wsj() +
+  scale_fill_brewer(palette = "Set2") +
+  theme_user(16, 16, 12, 45)
+```
+
+The common advantage of walking, taking bus and taking subway that people think should be their inexpensiveness and convenience, which can be verified by the following plot. According to this, that people whose year's income are below $24,999 prefer walking, taking bus and subway can be understood. 
+
+```{r}
+walk <- survey %>%
+  filter(!is.na(qgender)) %>%
+  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA1_mA1", "gFOCUSAA1_qFOCUSAA1_mA2", 
+                    "gFOCUSAA1_qFOCUSAA1_mA3", "gFOCUSAA1_qFOCUSAA1_mA4",
+                    "gFOCUSAA1_qFOCUSAA1_mA5", "gFOCUSAA1_qFOCUSAA1_mA6", "allwt"))
+
+subway <- survey %>%
+  filter(!is.na(qgender)) %>%
+  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA2_mA1", "gFOCUSAA1_qFOCUSAA2_mA2", 
+                    "gFOCUSAA1_qFOCUSAA2_mA3", "gFOCUSAA1_qFOCUSAA2_mA4",
+                    "gFOCUSAA1_qFOCUSAA2_mA5", "gFOCUSAA1_qFOCUSAA2_mA6", "allwt"))
+
+bus <- survey %>%
+  filter(!is.na(qgender)) %>%
+  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA3_mA1", "gFOCUSAA1_qFOCUSAA3_mA2", 
+                    "gFOCUSAA1_qFOCUSAA3_mA3", "gFOCUSAA1_qFOCUSAA3_mA4",
+                    "gFOCUSAA1_qFOCUSAA3_mA5", "gFOCUSAA1_qFOCUSAA3_mA6", "allwt"))
+
+colnames(walk) <- c("UniqueID", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
+colnames(subway) <- c("UniqueID", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
+colnames(bus) <- c("UniqueID", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
+
+walk <- walk %>%
+  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
+  mutate(Mode = "Walk")
+
+subway <- subway %>%
+  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
+  mutate(Mode = "subway")
+
+bus <- bus %>%
+  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
+  mutate(Mode = "Bus")
+
+describe <- rbind(walk, subway, bus) %>%
+  group_by(Mode, Description, Answer) %>%
+  summarise(Sum = sum(allwt)) %>%
+  ungroup() %>%
+  group_by(Mode, Description) %>%
+  mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
+  ungroup()
+
+describe$Answer[describe$Answer == 0] <- "No"
+describe$Answer[describe$Answer == 1] <- "Yes"
+
+describe$Answer <- factor(describe$Answer, levels = c("Yes", "No"))
+describe$Description <- factor(describe$Description, levels = c("Inexpensive", "Convenient", "Reliable", "Safe", "Comfortable", "Fast"))
+
+ggplot(describe) +
+  geom_mosaic(aes(x = product(Answer, Description), fill = Answer, weight = Sum)) + 
+  facet_grid(.~Mode) +
+  labs(x = 'Description', y = 'Answer', title = "Descriptions of Bus, Subway and Walk",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_wsj() +
+  theme_user(16, 16, 12, 45) + 
+  theme(legend.position = "none")
+```
+
+Now let's back to the graph "Income Composition" and think about train and rail. There seems some difference between the proportion of people having different income. But actually we don't think it's caused by the difference between people's income directly. We suspect that it's due to the lack of subway in the region whese these residents live. Because when we are asked to choose a transportation mode, if subway and train are available meanwhile, most of us would choose subway due to its fast speed and inexpensiveness. 
+
+we think the differences between the proportion of people with different income may not have some meaningful reason.
+
+```{r}
+walk <- survey %>%
+  filter(!is.na(qgender)) %>%
+  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA1_mA1", "gFOCUSAA1_qFOCUSAA1_mA2", 
+                    "gFOCUSAA1_qFOCUSAA1_mA3", "gFOCUSAA1_qFOCUSAA1_mA4",
+                    "gFOCUSAA1_qFOCUSAA1_mA5", "gFOCUSAA1_qFOCUSAA1_mA6", "allwt"))
+
+subway <- survey %>%
+  filter(!is.na(qgender)) %>%
+  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA2_mA1", "gFOCUSAA1_qFOCUSAA2_mA2", 
+                    "gFOCUSAA1_qFOCUSAA2_mA3", "gFOCUSAA1_qFOCUSAA2_mA4",
+                    "gFOCUSAA1_qFOCUSAA2_mA5", "gFOCUSAA1_qFOCUSAA2_mA6", "allwt"))
+
+bus <- survey %>%
+  filter(!is.na(qgender)) %>%
+  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA3_mA1", "gFOCUSAA1_qFOCUSAA3_mA2", 
+                    "gFOCUSAA1_qFOCUSAA3_mA3", "gFOCUSAA1_qFOCUSAA3_mA4",
+                    "gFOCUSAA1_qFOCUSAA3_mA5", "gFOCUSAA1_qFOCUSAA3_mA6", "allwt"))
+
+colnames(walk) <- c("UniqueID", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
+colnames(subway) <- c("UniqueID", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
+colnames(bus) <- c("UniqueID", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
+
+walk <- walk %>%
+  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
+  mutate(Mode = "Walk")
+
+subway <- subway %>%
+  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
+  mutate(Mode = "subway")
+
+bus <- bus %>%
+  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
+  mutate(Mode = "Bus")
+
+describe <- rbind(walk, subway, bus) %>%
+  group_by(Mode, Description, Answer) %>%
+  summarise(Sum = sum(allwt)) %>%
+  ungroup() %>%
+  group_by(Mode, Description) %>%
+  mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
+  ungroup()
+
+describe$Answer[describe$Answer == 0] <- "No"
+describe$Answer[describe$Answer == 1] <- "Yes"
+
+describe$Answer <- factor(describe$Answer, levels = c("Yes", "No"))
+describe$Description <- factor(describe$Description, levels = c("Inexpensive", "Convenient", "Reliable", "Safe", "Comfortable", "Fast"))
+
+ggplot(describe) +
+  geom_mosaic(aes(x = product(Answer, Description), fill = Answer, weight = Sum)) + 
+  facet_grid(.~Mode) +
+  labs(x = 'Description', y = 'Answer', title = "Descriptions of Bus, Subway and Walk",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_wsj() +
+  theme_user(16, 16, 12, 45) + 
+  theme(legend.position = "none")
+```
+
+
+
+We're wondering whether or not these differences are caused by age. 
+
+```{r}
+library(ggmosaic)
+
+age_income <- df_general[c(1, 3, 6, 31)]
+
+age_income$qincome[age_income$qincome %in% c(1, 2)] <- "Less than $24,999"
+age_income$qincome[age_income$qincome %in% c(3, 4, 5, 6)] <- "$25,000 - $99,999"
+age_income$qincome[age_income$qincome %in% c(7, 8, 9)] <- "$100,000 and above"
+age_income$qincome[age_income$qincome %in% c(10, 11)] <- "Other"
+
+age_income$Age <- cut(age_income$qage, breaks = c(17, 30, 60, 100, 1999), 
+               labels=c("18-29","30-59", 
+                        "60-99", "Refused"))
+
+age_income['qincome'] <- factor(age_income$qincome, 
+                        levels = c("Less than $24,999", "$25,000 - $99,999", "$100,000 and above", "Other"))
+age_income['qage'] <- factor(age_income$qage, 
+                        levels = c("18-29", "30-59", "60-99", "Refused"))
+
+age_income <- age_income %>%
+  group_by(qincome, Age) %>%
+  summarise(Count = sum(allwt)) %>%
+  ungroup()
+
+
+
+ggplot(age_income) +
+  geom_mosaic(aes(x = product(Age, qincome), fill = Age, weight = Count)) + 
+  labs(x = 'Income', y = 'Age', title = "Age Composition in Each Income Group",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_wsj() +
+  theme_user(16, 16, 12, 0) + 
+  theme(legend.position = "none")
+
+```
 
