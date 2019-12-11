@@ -87,9 +87,9 @@ ggplot(df1, aes(reorder(Mode, -Order), Sum, fill = gender)) +
   theme_user(16, 16, 12, 45)
 ```
 
-```{r}
-library(ggmosaic)
+Visualize respondents' description of bicycling via Cleverland dot plot faceted by gender. We separate respondents into two groups, prefering bicycling and not prefering bicycling. For those would like to ride a bicycle to get around the city, both females and males, the majority of them think bicycling is not only inexpensive but also convenient. However, for those not prefering bicycling, the main reason for they rejecting to ride a bicycling to get around the city is that they think it's not safe enough in New York City. By further exploring, we can notice that the ranks of the reasons for prefering or not prefering riding a bicycle are the same for male and female residents, but the gender composition in Bicycling shows that more males than females chose this mode. The possible interpretation is that what males are concern about most is different from that of females.
 
+```{r}
 survey <- read.csv("data/raw_survey_data.csv")
 
 survey <- survey %>%
@@ -150,32 +150,6 @@ ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order), color = factor(
 ```
 
 
-```{r}
-library(ggmosaic)
-
-survey$Safe[survey$Safe == "0"] <- "No"
-survey$Safe[survey$Safe == "1"] <- "Yes"
-survey$Gender[survey$Gender == '3'] <- "Don't know"
-survey$Gender[survey$Gender == '4'] <- "Refused"
-
-survey['Gender'] <- factor(survey$Gender, levels = c("Male", "Female", "Don't know", "Refused"))
-survey['Safe'] <- factor(survey$Safe)
-survey_3 <- merge(travel_mode, survey, by = "UniqueID", all.x = TRUE) %>%
-  filter(Bicycle == 0) %>%  # Only forcus on those did not choose bicycle
-  subset(select = c(1, 10, 15, 19)) %>%
-  group_by(Safe, Gender) %>%
-  summarise(Count = sum(allwt)) %>%
-  ungroup()
-
-ggplot(survey_3) +
-   geom_mosaic(aes(x = product(Safe, Gender), fill = Gender, weight = Count), offset = 0.025) + 
-   labs(x = 'Gender', y = 'Safe', title = "Proportion of Males and Females with Different Answers",
-        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
-   scale_fill_brewer(palette = "Set2") +
-   theme_wsj() +
-   theme_user(16, 16, 12, 45) + 
-   theme(legend.position = "none")
-```
 
 
 
