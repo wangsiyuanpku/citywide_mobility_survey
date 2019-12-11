@@ -176,7 +176,7 @@ traveler_income %>%
   mutate(prop = num / sum(num)) %>% 
   ggplot(aes(qincome, prop)) +
   geom_col() +
-  labs(x = 'Income', y = 'Count', title = "Propotion of Respondents with Different Income", 
+  labs(x = 'Income', y = 'Proportion', title = "Propotion of Respondents with Different Income", 
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_wsj() +
   theme_user(15, 14, 12, 0)
@@ -317,110 +317,61 @@ ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
 ```
 ![](image/subway_map.png)
 
+## Is there any differences between the age composition of the residents choosing different transportation modes?
 
-
-we think the differences between the proportion of people with different income may not have some meaningful reason.
+We are concerned about the choices of middle-aged residents and old residents, so we divide the respondents into two groups, below 60 years old and above 60 years old. There are 80% middle-aged respondents and almost 20% old residents.
 
 ```{r}
-walk <- survey %>%
-  filter(!is.na(qgender)) %>%
-  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA1_mA1", "gFOCUSAA1_qFOCUSAA1_mA2", 
-                    "gFOCUSAA1_qFOCUSAA1_mA3", "gFOCUSAA1_qFOCUSAA1_mA4",
-                    "gFOCUSAA1_qFOCUSAA1_mA5", "gFOCUSAA1_qFOCUSAA1_mA6", "allwt"))
+age <- df_general[c(1, 3, 31)] %>%
+  filter(qage != 1999)
 
-subway <- survey %>%
-  filter(!is.na(qgender)) %>%
-  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA2_mA1", "gFOCUSAA1_qFOCUSAA2_mA2", 
-                    "gFOCUSAA1_qFOCUSAA2_mA3", "gFOCUSAA1_qFOCUSAA2_mA4",
-                    "gFOCUSAA1_qFOCUSAA2_mA5", "gFOCUSAA1_qFOCUSAA2_mA6", "allwt"))
+age$Age <- cut(age$qage, breaks = c(17, 60, 100, 1999), 
+               labels=c("18-59", 
+                        "60-99", "Refused"))
 
-bus <- survey %>%
-  filter(!is.na(qgender)) %>%
-  subset(select = c("UniqueID", "gFOCUSAA1_qFOCUSAA3_mA1", "gFOCUSAA1_qFOCUSAA3_mA2", 
-                    "gFOCUSAA1_qFOCUSAA3_mA3", "gFOCUSAA1_qFOCUSAA3_mA4",
-                    "gFOCUSAA1_qFOCUSAA3_mA5", "gFOCUSAA1_qFOCUSAA3_mA6", "allwt"))
-
-colnames(walk) <- c("UniqueID", "Convenient", "Reliable", 
-                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
-colnames(subway) <- c("UniqueID", "Convenient", "Reliable", 
-                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
-colnames(bus) <- c("UniqueID", "Convenient", "Reliable", 
-                      "Fast", "Inexpensive", "Safe", "Comfortable", "allwt")
-
-walk <- walk %>%
-  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
-  mutate(Mode = "Walk")
-
-subway <- subway %>%
-  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
-  mutate(Mode = "subway")
-
-bus <- bus %>%
-  gather(key = "Description", value = "Answer", -c(1, 8)) %>%
-  mutate(Mode = "Bus")
-
-describe <- rbind(walk, subway, bus) %>%
-  group_by(Mode, Description, Answer) %>%
-  summarise(Sum = sum(allwt)) %>%
+age %>%
+  group_by(Age) %>%
+  summarise(num = sum(allwt)) %>%
   ungroup() %>%
-  group_by(Mode, Description) %>%
-  mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
-  ungroup()
-
-describe$Answer[describe$Answer == 0] <- "No"
-describe$Answer[describe$Answer == 1] <- "Yes"
-
-describe$Answer <- factor(describe$Answer, levels = c("Yes", "No"))
-describe$Description <- factor(describe$Description, levels = c("Inexpensive", "Convenient", "Reliable", "Safe", "Comfortable", "Fast"))
-
-ggplot(describe) +
-  geom_mosaic(aes(x = product(Answer, Description), fill = Answer, weight = Sum)) + 
-  facet_grid(.~Mode) +
-  labs(x = 'Description', y = 'Answer', title = "Descriptions of Bus, Subway and Walk",
+  mutate(prop = num / sum(num)) %>% 
+  ggplot(aes(Age, prop)) +
+  geom_col() +
+  labs(x = 'Age', y = 'Proportion', title = "Propotion of Respondents with Different Age", 
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
-  scale_fill_brewer(palette = "Set2") +
   theme_wsj() +
-  theme_user(16, 16, 12, 45) + 
-  theme(legend.position = "none")
+  theme_user(15, 14, 12, 0)
 ```
 
-
-
-We're wondering whether or not these differences are caused by age. 
+The result is consistent with what we thought. Middle-aged residents take a relative huge proportion in people who choode bicycle, while more old residents prefer taking car to get around the city due to healthy or some other issue. 
 
 ```{r}
 library(ggmosaic)
 
-age_income <- df_general[c(1, 3, 6, 31)]
+age_1 <- merge(age, travel_mode) %>%
+  subset(select = c(1, 4:12)) %>%
+  filter(Age %in% c("60-99", "18-59"))
 
-age_income$qincome[age_income$qincome %in% c(1, 2)] <- "Less than $24,999"
-age_income$qincome[age_income$qincome %in% c(3, 4, 5, 6)] <- "$25,000 - $99,999"
-age_income$qincome[age_income$qincome %in% c(7, 8, 9)] <- "$100,000 and above"
-age_income$qincome[age_income$qincome %in% c(10, 11)] <- "Other"
-
-age_income$Age <- cut(age_income$qage, breaks = c(17, 30, 60, 100, 1999), 
-               labels=c("18-29","30-59", 
-                        "60-99", "Refused"))
-
-age_income['qincome'] <- factor(age_income$qincome, 
-                        levels = c("Less than $24,999", "$25,000 - $99,999", "$100,000 and above", "Other"))
-age_income['qage'] <- factor(age_income$qage, 
-                        levels = c("18-29", "30-59", "60-99", "Refused"))
-
-age_income <- age_income %>%
-  group_by(qincome, Age) %>%
-  summarise(Count = sum(allwt)) %>%
+age_1 <- age_1 %>%
+  gather(key = "Mode", value = "Count", -c(1, 2)) %>%
+  merge(weight, by = "UniqueID", all.x = TRUE) %>%
+  filter(!is.na(Count) & !is.na(weight_fill)) %>%
+  mutate(Count = weight_fill * Count) %>%
+  group_by(Mode, Age) %>%
+  summarise(Sum = sum(Count)) %>%
   ungroup()
 
+age_1$Mode <- factor(age_1$Mode, levels = c("Bicycle", "Train&Rail", "Subway", "Ferry", "For-hire vehicle", "Walk", "Bus", "Car"))
+ 
 
 
-ggplot(age_income) +
-  geom_mosaic(aes(x = product(Age, qincome), fill = Age, weight = Count)) + 
-  labs(x = 'Income', y = 'Age', title = "Age Composition in Each Income Group",
+
+ggplot(age_1) +
+  geom_mosaic(aes(x = product(Age, Mode), fill = Age, weight = Sum)) + 
+  labs(x = 'Transportation Mode', y = 'Age', title = "Age Composition",
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   scale_fill_brewer(palette = "Set2") +
   theme_wsj() +
-  theme_user(16, 16, 12, 0) + 
+  theme_user(16, 16, 12, 45) + 
   theme(legend.position = "none")
 
 ```
