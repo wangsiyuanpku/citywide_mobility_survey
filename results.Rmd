@@ -167,7 +167,6 @@ survey_3 <- merge(travel_mode, survey, by = "UniqueID", all.x = TRUE) %>%
   summarise(Count = sum(allwt)) %>%
   ungroup()
 
-
 ggplot(survey_3) +
    geom_mosaic(aes(x = product(Safe, Gender), fill = Gender, weight = Count), offset = 0.025) + 
    labs(x = 'Gender', y = 'Safe', title = "Proportion of Males and Females with Different Answers",
