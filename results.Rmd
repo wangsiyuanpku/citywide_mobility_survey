@@ -59,6 +59,8 @@ traveler_gender %>%
 
 We plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. We can easily notice that the gender composition among different transportation modes are different, expecially between bicycle and the other modes. Almost 70% residents that prefer riding a bicyle to get around the city are males, greatly beyond the number of females. On the contrary, less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
 
+It may be because females do not think riding bicycle is safe enough in New York City, or males want to make use of their spare time to take exercise, for which riding bicycle is a good idea. 
+
 ```{r, echo=FALSE}
 # Transportation mode ~ Gender
 traveler_gender1 <- traveler_gender[c(1, 4)]
@@ -82,6 +84,40 @@ ggplot(df1, aes(reorder(Mode, -Order), Sum, fill = gender)) +
   scale_fill_brewer(palette = "Set2", name = "Gender", labels = c("Male", "Female")) +
   theme_user(16, 16, 12, 45)
 ```
+
+```{r}
+survey <- read.csv("data/raw_survey_data.csv")
+
+survey <- survey %>%
+  subset(select = c("UniqueID", "qgender", "gFOCUSAA1_qFOCUSAA6_mA1", "gFOCUSAA1_qFOCUSAA6_mA2", 
+                    "gFOCUSAA1_qFOCUSAA6_mA3", "gFOCUSAA1_qFOCUSAA6_mA4",
+                    "gFOCUSAA1_qFOCUSAA6_mA5", "gFOCUSAA1_qFOCUSAA6_mA6",
+                    "gFOCUSAA1_qFOCUSAA6_mA7", "gFOCUSAA1_qFOCUSAA6_mA8", "allwt"))
+colnames(survey) <- c("UniqueID", "Gender", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable","Don't know", "Refused", "allwt")
+survey['Gender'] <- factor(survey$Gender)
+survey_1 <- merge(travel_mode,survey, by = "UniqueID", all = TRUE) %>%
+  filter(Bicycle == 0 & Gender %in% c(1, 2)) %>%  # Only forcus on those did not choose bicycle
+  subset(select = c(1, 10:19)) %>%
+  gather(key = "Description", value = "num", -c(1:2, 11)) %>%
+  mutate(Count = allwt * num) %>%
+  group_by(Description, Gender) %>%
+  summarise(Sum = sum(Count)) %>%
+  ungroup() %>%
+  group_by(Description) %>%
+  mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
+  ungroup()
+
+ggplot(survey_1, aes(reorder(Description, -Order), Sum, fill = Gender)) +
+  geom_bar(stat="identity", position = "fill") + 
+  labs(x = 'Transportation Mode', y = 'Proportion', caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_wsj() +
+  scale_fill_brewer(palette = "Set2", name = "Gender", labels = c("Male", "Female")) +
+  theme_user(16, 16, 12, 45)
+```
+
+
+
 
 
 ```{r, echo=FALSE}
