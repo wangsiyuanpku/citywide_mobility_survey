@@ -6,17 +6,18 @@ library(ggthemes)
 library(parcoords)
 load("data/travel_data.rda")  # df_travel
 load("data/mobility_general.rda")  # df_general
+weight <- read.csv("data/weight_fill.csv")
 ```
 
 ```{r, echo=FALSE}
 # Define a function to set the theme of plots
-theme_user <- function(total_size, title_size, subtitle_size) {
+theme_user <- function(total_size, title_size, subtitle_size, angle) {
   theme_plot <- theme_bw(total_size) +
-  theme(axis.text.x = element_text(size = rel(0.8), angle = 45, vjust = 0.5),
+  theme(axis.text.x = element_text(size = rel(0.8), angle = angle, vjust = 0.5),
         axis.text.y = element_text(size = rel(0.8)), 
         axis.ticks.y = element_blank(),
-        axis.title.x = element_text(size = rel(0.8)),
-        axis.title.y = element_text(size = rel(0.8)),
+        axis.title.x = element_text(size = rel(0.7)),
+        axis.title.y = element_text(size = rel(0.7)),
         panel.grid.major.x = element_line(size = 0.8),
         panel.grid.major.y = element_line(size = 0.8),
         panel.grid.minor.x = element_blank(),
@@ -32,38 +33,54 @@ theme_user <- function(total_size, title_size, subtitle_size) {
 ```
 
 
-## 5.1 Is there any difference between the gender composition in each transportation mode?
+## 5.1 Is there any differences between the gender composition in each transportation mode?
 
-We plot a stacked bar chart for each feature. First of all, we can see that gender, age and income all have influence on the composition of the transportation modes. More specifically, the majority of the residents who willing to ride a bicycle to get around the city are males, around 18-54 years old, and most of them have an income ranging from \$50,000 to \$149,999. Bus, for-hire vehicle and walk are prefered by female residents. In addition, compared with bicycle, other transportation modes are prefered by a relative high proportion of people over 55 years old. Also, a higher proportion of people whose income is higher than 150,000 love to get around the city using bicycle, car and for-hire vehicle when compared with bus, ferry and subway. The majority of residents that prefer taking train are around 25-64 years old.
+Remove the records which are "Don't know" or "Refused" in Gender and calculate the proportion of the respondents with different gender. There are totally 41.16% males and 58.84% females among all the respondents.
+
+```{r}
+traveler_gender <- df_general[c(1:2, 31)] %>%
+  filter(qgender %in% c(1, 2))
+
+traveler_gender['gender'] <- factor(traveler_gender$qgender)
+
+traveler_gender %>%
+  group_by(gender) %>%
+  summarise(num = sum(allwt)) %>%
+  ungroup() %>%
+  mutate(prop = num / sum(num)) %>% 
+  ggplot(aes(gender, prop)) +
+  geom_col() +
+  labs(x = 'Gender', y = 'Count', title = "Propotion of Male and Female Respondents", 
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_wsj() +
+  scale_x_discrete(labels=c("1" = "Male", "2" = "Female")) +
+  theme_user(16, 16, 12, 0)
+```
+
+We plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. We can easily notice that the gender composition among different transportation modes are different, expecially between bicycle and the other modes. Almost 70% residents that prefer riding a bicyle to get around the city are males, greatly beyond the number of females. On the contrary, less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
 
 ```{r, echo=FALSE}
 # Transportation mode ~ Gender
-travel_mode <- df_travel[c(1, 4:12)]
-traveler_gender <- df_general[c(1:2)]  
+traveler_gender1 <- traveler_gender[c(1, 4)]
+travel_mode <- df_travel[c(1, 5:12)]
 
-colnames(traveler_gender) <- c('UniqueID', 'Gender')
-traveler_gender['Gender'] <- factor(traveler_gender$Gender)
-
-df1 <- merge(travel_mode, traveler_gender, by = "UniqueID", all = TRUE) %>%
-  filter(Gender %in% c(1, 2))
-
-df1 <- df1 %>%
-  gather(key = 'Mode', value = "Number", -c(1:2, 11)) 
-
-weight <- df1 %>%
-  group_by(UniqueID) %>%
-  summarise(Weight = sum(allwt) / (8 * sum(Number))) %>%
+df1 <- merge(travel_mode, traveler_gender1, by = "UniqueID", all.u = TRUE) %>%
+  gather(key = 'Mode', value = "Number", -c(1, 10)) %>%
+  merge(weight, by = "UniqueID", all = TRUE) %>%
+  mutate(Count = weight_fill * Number) %>%
+  group_by(Mode, gender) %>%
+  summarise(Sum = sum(Count)) %>%
+  ungroup() %>%
+  group_by(Mode) %>%
+  mutate(Prop = Sum/sum(Sum), Order = last(Prop)) %>%
   ungroup()
 
-df1 <- merge(df1, weight, by = "UniqueID", all = TRUE) %>%
-  mutate(Count = Weight * Number)
-
-ggplot(df1, aes(Mode, Count, fill = Gender)) +
+ggplot(df1, aes(reorder(Mode, -Order), Sum, fill = gender)) +
   geom_bar(stat="identity", position = "fill") + 
   labs(x = 'Transportation Mode', y = 'Proportion', caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_wsj() +
   scale_fill_brewer(palette = "Set2", name = "Gender", labels = c("Male", "Female")) +
-  theme_user(15, 12, 12)
+  theme_user(16, 16, 12, 45)
 ```
 
 
@@ -129,3 +146,6 @@ ggplot(df4, aes(Mode, Count, fill = Income)) +
   scale_fill_brewer(palette = "Set2", name = "Income") +
   theme_user(15, 12, 12)
 ```
+
+
+We plot a stacked bar chart for each feature. First of all, we can see that gender, age and income all have influence on the composition of the transportation modes. More specifically, the majority of the residents who willing to ride a bicycle to get around the city are males, around 18-54 years old, and most of them have an income ranging from \$50,000 to \$149,999. Bus, for-hire vehicle and walk are prefered by female residents. In addition, compared with bicycle, other transportation modes are prefered by a relative high proportion of people over 55 years old. Also, a higher proportion of people whose income is higher than 150,000 love to get around the city using bicycle, car and for-hire vehicle when compared with bus, ferry and subway. The majority of residents that prefer taking train are around 25-64 years old.
