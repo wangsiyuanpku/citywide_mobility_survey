@@ -27,7 +27,7 @@ theme_user <- function(total_size, title_size, subtitle_size, angle) {
         legend.title = element_blank(),
         legend.text = element_text(size = 10),
         legend.key.size = unit(0.6, "cm"),
-        panel.spacing = unit(.5, 'pt'))
+        panel.spacing = unit(3, 'pt'))
   return <- theme_plot
 }
 ```
@@ -93,6 +93,69 @@ library(ggmosaic)
 survey <- read.csv("data/raw_survey_data.csv")
 
 survey <- survey %>%
+  filter(!is.na(qgender) & qgender %in% c(1, 2)) %>%
+  subset(select = c("UniqueID", "qgender", "gFOCUSAA1_qFOCUSAA6_mA1", "gFOCUSAA1_qFOCUSAA6_mA2", 
+                    "gFOCUSAA1_qFOCUSAA6_mA3", "gFOCUSAA1_qFOCUSAA6_mA4",
+                    "gFOCUSAA1_qFOCUSAA6_mA5", "gFOCUSAA1_qFOCUSAA6_mA6",
+                    "gFOCUSAA1_qFOCUSAA6_mA7", "gFOCUSAA1_qFOCUSAA6_mA8", "allwt"))
+
+colnames(survey) <- c("UniqueID", "Gender", "Convenient", "Reliable", 
+                      "Fast", "Inexpensive", "Safe", "Comfortable","Don't know", "Refused", "allwt")
+
+survey$Gender[survey$Gender == '1'] <- "Male"
+survey$Gender[survey$Gender == '2'] <- "Female"
+
+survey_1 <- merge(travel_mode, survey, by = "UniqueID", all.y = TRUE) %>%
+  filter(Bicycle == 0) %>%  # Only forcus on those did not choose bicycle
+  subset(select = c(1, 10:19)) %>%
+  gather(key = "Description", value = "Choice", -c(1:2, 11)) %>%
+  group_by(Description, Gender, Choice) %>%
+  summarise(Num = sum(allwt)) %>%
+  ungroup() %>%
+  group_by(Description, Gender) %>%
+  mutate(Prop = Num / sum(Num), Order = first(Prop)) %>%
+  ungroup()
+  
+# Description of Bicycling from Residents Who Do Not Prefer Bicycling
+ggplot(survey_1, aes(x = Prop, y = reorder(Description, -Order), color = factor(Choice))) +
+  geom_point(size = 1.8) +
+  facet_grid(Gender~.) +
+  labs(x = "Proportion", y = "Description", title = "Description of Bicycling from Residents Who Do Not Prefer Bicycling",
+       caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9", 
+       x = "Count", y = "Modes of Transportation") + 
+  scale_color_manual(labels = c("No", "Yes"), values = c("cyan2", "sienna3"))+
+  theme_user(15, 14, 12, 0)
+
+
+survey_2 <- merge(travel_mode, survey, by = "UniqueID", all.y = TRUE) %>%
+  filter(Bicycle == 1) %>%  # Only forcus on those did not choose bicycle
+  subset(select = c(1, 10:19)) %>%
+  gather(key = "Description", value = "Choice", -c(1:2, 11)) %>%
+  group_by(Description, Gender, Choice) %>%
+  summarise(Num = sum(allwt)) %>%
+  ungroup() %>%
+  group_by(Description, Gender) %>%
+  mutate(Prop = Num / sum(Num), Order = first(Prop)) %>%
+  ungroup()
+
+ #Description of Bicycling from Residents Who Prefer Bicycling
+ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order), color = factor(Choice))) +
+  geom_point(size = 1.8) +
+  facet_grid(Gender~.) +
+  labs(x = "Proportion", y = "Description", title = "Description of Bicycling from Residents Who Prefer Bicycling",
+       caption = "Source: Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9", 
+       x = "Count", y = "Modes of Transportation") + 
+  scale_color_manual(labels = c("No", "Yes"), values = c("cyan2", "sienna3"))+
+  theme_user(15, 14, 12, 0)
+```
+
+
+```{r}
+library(ggmosaic)
+
+survey <- read.csv("data/raw_survey_data.csv")
+
+survey <- survey %>%
   subset(select = c("UniqueID", "qgender", "gFOCUSAA1_qFOCUSAA6_mA1", "gFOCUSAA1_qFOCUSAA6_mA2", 
                     "gFOCUSAA1_qFOCUSAA6_mA3", "gFOCUSAA1_qFOCUSAA6_mA4",
                     "gFOCUSAA1_qFOCUSAA6_mA5", "gFOCUSAA1_qFOCUSAA6_mA6",
@@ -119,12 +182,12 @@ survey_1 <- merge(travel_mode, survey, by = "UniqueID", all.x = TRUE) %>%
 
 
 ggplot(survey_1) +
-   geom_mosaic(aes(x = product(Gender, Safe), fill = Gender, weight = Count), offset = 0.028) + 
-   labs(x = 'Safe', y = 'Gender', title = "Proportion of Males and Females with Different Answers",
+   geom_mosaic(aes(x = product(Safe, Gender), fill = Gender, weight = Count), offset = 0.025) + 
+   labs(x = 'Gender', y = 'Safe', title = "Proportion of Males and Females with Different Answers",
         caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
    scale_fill_brewer(palette = "Set2") +
    theme_wsj() +
-   theme_user(14, 14, 12, 0) + 
+   theme_user(16, 16, 12, 45) + 
    theme(legend.position = "none")
 ```
 
