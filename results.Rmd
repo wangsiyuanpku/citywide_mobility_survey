@@ -34,7 +34,7 @@ theme_user <- function(total_size, title_size, subtitle_size, angle) {
 
 
 
-## 5.1 Is there any differences between the gender composition of the residents choosing different transportation modes?
+## Is there any differences between the gender composition of the residents choosing different transportation modes?
 
 Calculate the proportion of the respondents with different gender. There are totally 41.12% males and 58.77% females among all the respondents.
 
@@ -152,7 +152,7 @@ ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order), color = factor(
 ```
 
 
-## 5.2 Is there any differences between the income composition of the residents choosing different transportation modes?
+## Is there any differences between the income composition of the residents choosing different transportation modes?
 
 We are also interested in the possible relationship between resident's income and their mode choices. First we plot a bar chart in terms of income to quick learn about the proportion of respondents with different income. According to our interest, we recombine the income into 4 categories, which are "\$100,000 and above", "\$25,000 - \$99,999", "Less than \$24,999" and "Other". Almost half of the respondents have a year's income between $25,000 and \$99,999 and the proportions of residents with less than \$24,999 in come and those with more than \$100,000 income are roughly equal.
 
@@ -283,6 +283,41 @@ ggplot(describe) +
 ```
 
 Now let's back to the graph "Income Composition" and think about train and rail. There seems some difference between the proportion of people having different income. But actually we don't think it's caused by the difference between people's income directly. We suspect that it's due to the lack of subway in the region whese these residents live. Because when we are asked to choose a transportation mode, if subway and train are available meanwhile, most of us would choose subway due to its fast speed and inexpensiveness. 
+
+Let's verify this guess by plotting a bar chart of the borough distribution of the residents who prefer train and rail, and compare it with the map of New York City subway system. We also plot the borough distribution of all the residents to determine whether or not the pattern we would found is caused by the ubanlanced sampling proportion of different borough.
+
+The bar chart shows that almost 40% respondents that choosing train and rail live in Queens, higher than the sampling proportion. So this can be treated as a significant pattern. We can see from the New York City subway system map that Queens almost has no subway system, indicating that the residents living there have limited public transportation modes choices and that what we suspected has been verified. 
+
+```{r}
+df_general["Borough"] <- as.data.frame(unlist(df_general$borough))
+
+borough_total <- df_general[c("Borough", "allwt")] %>%
+  group_by(Borough) %>%
+  summarise(Count = sum(allwt)) %>%
+  ungroup() %>%
+  mutate(Prop = Count / sum(Count), type = "Total")
+
+borough <- merge(travel_mode, df_general) %>%
+  subset(select = c(1, 5, 39, 40)) %>%
+  filter(`Train&Rail` == 1) %>%
+  group_by(Borough) %>%
+  summarise(Count = sum(allwt)) %>%
+  ungroup() %>%
+  mutate(Prop = Count/sum(Count), type = "Prefer Train & Rail")
+
+borough <- rbind(borough_total, borough)
+
+ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
+  geom_col() +
+  facet_grid(.~ type) +
+  labs(x = 'Borough', y = 'Proportion', title = "Borough Distribution of Residents", 
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_wsj() +
+  theme_user(15, 14, 12, 0)
+```
+![](image/subway_map.png)
+
+
 
 we think the differences between the proportion of people with different income may not have some meaningful reason.
 
