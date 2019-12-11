@@ -34,7 +34,7 @@ theme_user <- function(total_size, title_size, subtitle_size, angle) {
 
 
 
-## 5.1 Is there any differences between the gender composition in each transportation mode?
+## 5.1 Is there any differences between the gender composition of the residents choosing different transportation modes?
 
 Calculate the proportion of the respondents with different gender. There are totally 41.12% males and 58.77% females among all the respondents.
 
@@ -57,9 +57,11 @@ traveler_gender %>%
   theme_user(16, 16, 12, 0)
 ```
 
-After removing the records which are "Don't know" or "Refused" in Gender, we plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. We can easily notice that the gender composition among different transportation modes are different, expecially between bicycle and the other modes. Almost 70% residents that prefer riding a bicyle to get around the city are males, greatly beyond the number of females. On the contrary, less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
+After removing the records which are "Don't know" or "Refused" in Gender, we plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. Note that if there's no difference between the gender composition of each transportation mode, then the line separates male and female should be on the same level. 
 
-In order to interpret the huge difference between the number of males and females prefering bicycle, we propose several possible reasons. It may be because females do not think riding bicycle is safe enough in New York City due to the high crime rate, or males want to make use of their spare time to take exercise, for which riding bicycle is a good idea. We can further verify our assumptions by exploring the question in the questionaire, "Which of the following words most apply to Bicycling?".   
+We can easily notice that the gender composition among different modes are different, expecially between bicycle and the other modes. Almost 70% residents that prefer riding a bicyle to get around the city are males, greatly beyond the number of females. On the contrary, relative less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
+
+In order to interpret the huge difference between the number of males and females prefering bicycle, we propose several possible reasons firstly. It may be because females do not think riding bicycle is safe enough in New York City due to the high crime rate, or males want to make use of their spare time to take exercise, for which riding bicycle is a good idea. We can further verify our guesses by exploring the question in the questionaire, "Which of the following words most apply to Bicycling?".   
 
 ```{r, echo=FALSE}
 # Transportation mode ~ Gender
@@ -150,6 +152,6 @@ ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order), color = factor(
 ```
 
 
-
+## 5.2 Is there any differences between the income composition of the residents choosing different transportation modes?
 
 
