@@ -33,6 +33,7 @@ theme_user <- function(total_size, title_size, subtitle_size, angle) {
 ```
 
 
+
 ## 5.1 Is there any differences between the gender composition in each transportation mode?
 
 Calculate the proportion of the respondents with different gender. There are totally 41.12% males and 58.77% females among all the respondents.
