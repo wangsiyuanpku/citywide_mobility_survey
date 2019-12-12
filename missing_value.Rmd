@@ -6,9 +6,13 @@ tidy_df <- tidy_survey %>%
   select(UniqueID,	qgender,	qage,	qrace,	qeducation,	qincome,	qzipcmb,	qSurveyZone,	borough,	travel_code,	qlicense,	gFREIGHT1_qFREIGHT1_mA,gFREIGHT1_qFREIGHT2_mA,gFREIGHT1_qFREIGHT3_mA,gFREIGHT1_qFREIGHT4_mA,gFREIGHTnew,	qsafety1,	qsafety2,	qsafety3,	qsafety4,	qsafety5,	qsafety6,	Description,gIMPROVE1_qIMPROVE1_mA,gIMPROVE1_qIMPROVE2_mA,gIMPROVE1_qIMPROVE3_mA,gIMPROVE1_qIMPROVE4_mA, gIMPROVE1_qIMPROVE5_mA,	qmarried,	qsmartphone,	qrent,	qnyc,	qchildren,	qemployment,	qzipwork1,	qzipwork2,	qzipwork3,	qzipwork4,	qzipwork5,	qzipwork6,	qtimework1,	qtimework2,	qtimework3,	qtimework4,	qtimework5,	qtimework6,	qtimehome1,	qtimehome2,	qtimehome3,	qtimehome4,	qtimehome5,	qtimehome6,	qindustry,	`Work Place`,	allwt) %>% filter(!is.na(UniqueID))
 ```
 
-The first step to explore the data is to analyze its missing pattern. We use `visna` graph from `extracat` package to visualize the missing pattern. It can be observed that the varibale `qzipwork` which decribes the Zipcode of the locations where the respondents work has the most missing value. Also the `qsafety` variable group contains a large amount of missing values which will probably cause bias to our conclusions in analysis. We will remove these variables and focus on the rest.
+The first step to explore the data is to analyze its missing pattern. We use `visna` graph from `extracat` package to visualize the missing pattern. It can be observed that the varibale `qzipwork` which decribes the Zipcode of the locations where the respondents work has the most missing value.Because it's a open question and a considerable amount of respondents do not report the locaation of their workplaces, the missing values are generated in the dataframe.
 
-The other variables have few or no missing value on which we can perform further exploratory analysis safely. Given the condition of our data, we will mainly concentrate on these varibales:
+Also the `qsafety` variable group contains a large amount of missing values which will probably cause bias to our conclusions in analysis. `qsafety` mainly focuses on how the respondents feel about the safety of certain transportation. The 4 variables with high missing proportion are those concerning the safety of bicycle riding and driving. Naturally those who don't drive or ride bikes will discard the questions. Besides, the safety topic is not related to the topic of interests,so we will remove these variables and focus on the rest.
+
+The other variables have few or no missing value on which we can perform further exploratory analysis safely. 
+Given the condition of our data, we will mainly concentrate on these varibales:
+
 
 1.dependent varibles:
 travel_code 
@@ -25,9 +29,9 @@ borough
 
 4.certain group of variables related to our topics:
 qnyc (years of living in New York City)
-qchildren
-qrent
-gFREIGHT varible groups
+qchildren (how many children do the respondents have ?)
+qrent (do the respondents own their house or rent their residence?)
+gFREIGHT varible groups (how often do the respondents recevie deliveries at home)
 
 
 5.weight:
