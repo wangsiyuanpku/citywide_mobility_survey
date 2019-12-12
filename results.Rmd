@@ -16,7 +16,7 @@ weight1 <- read.csv("data/weight_fill.csv")
 ```
 
 
-## Is there any differences between the gender composition of the residents choosing different transportation modes?
+## Differences between gender composition of the residents choosing different transportation modes
 
 Calculate the proportion of the respondents with different gender. There are totally 41.12% males and 58.77% females among all the respondents.
 
@@ -36,7 +36,7 @@ traveler_gender %>%
                             "3" = "Don't know", "4" = "Refused")) + 
   scale_y_continuous(labels = scales::percent) +
   labs(x = 'Gender', y = 'Proportion', 
-       title = "Propotion of Male and Female Respondents", 
+       title = "Proportion of Male and Female Respondents", 
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_economist()+
   theme(axis.text.x = element_text(size = 8, angle = 0))
@@ -44,9 +44,9 @@ traveler_gender %>%
 
 After removing the records which are "Don't know" or "Refused" in Gender, we plot a stacked bar chart and use the proportion of each gender we calculated above as the basis for comparison. Note that if there's no difference between the gender composition of each transportation mode, then the line separates male and female should be on the same level. 
 
-We can easily notice that the gender composition among different modes are different, expecially between bicycle and the other modes. Almost 70% residents that prefer riding a bicyle to get around the city are males, greatly beyond the number of females. On the contrary, relative less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
+We can easily notice that the gender composition among different modes are different, especially between bicycle and the other modes. Almost 70% residents that prefer riding a bicycle to get around the city are males, greatly beyond the number of females. On the contrary, relative less males than females would like to choose bus, for-hire vehicle and walk, which is not due to the unbalanced sampling proportion of different gender.
 
-In order to interpret the huge difference between the number of males and females prefering bicycle, we propose several possible reasons firstly. It may be because females do not think riding bicycle is safe enough in New York City due to the high crime rate, or males want to make use of their spare time to take exercise, for which riding bicycle is a good idea. We can further verify our guesses by exploring the question in the questionaire, "Which of the following words most apply to Bicycling?".   
+In order to interpret the huge difference between the number of males and females preferring bicycle, we propose several possible reasons firstly. It may be because females do not think riding bicycle is safe enough in New York City due to the high crime rate, or males want to make use of their spare time to take exercise, for which riding bicycle is a good idea. We can further verify our guesses by exploring the question in the questionnaire, "Which of the following words most apply to Bicycling?".   
 
 ```{r, echo=FALSE}
 # Transportation mode ~ Gender
@@ -84,7 +84,7 @@ ggplot(df1, aes(reorder(Mode, -Order), Sum, fill = Gender)) +
         legend.key.size = unit(0.6, "cm"))
 ```
 
-Visualize respondents' description of bicycling via Cleverland dot plot faceted by gender. We separate respondents into two groups, prefering bicycling and not prefering bicycling. For those would like to ride a bicycle to get around the city, both females and males, the majority of them think bicycling is not only inexpensive but also convenient. However, for those not prefering bicycling, the main reason for they rejecting to ride a bicycling to get around the city is that they think it's not safe enough in New York City. By further exploring, we notice that the order of the reasons for prefering or not prefering riding a bicycle are the same for male and female residents, but the gender composition in Bicycling shows that more males than females chose this mode. The possible interpretation is that what males are concerned about most is different from that of females. Comparing safety with cost as well as comfort level, males value the latter more. On the contrary, females may be concerned about safety most, which is consistent with our guess.
+Visualize respondents' description of bicycling via Cleveland dot plot faceted by gender. We separate respondents into two groups, preferring bicycling and not preferring bicycling. For those would like to ride a bicycle to get around the city, both females and males, the majority of them think bicycling is not only inexpensive but also convenient. However, for those not preferring bicycling, the main reason for they rejecting to ride a bicycling to get around the city is that they think it's not safe enough in New York City. By further exploring, we notice that the order of the reasons for preferring or not preferring riding a bicycle are the same for male and female residents, but the gender composition in Bicycling shows that more males than females chose this mode. The possible interpretation is that what males are concerned about most is different from that of females. Comparing safety with cost as well as comfort level, males value the latter more. On the contrary, females may be concerned about safety most, which is consistent with our guess.
 
 ```{r}
 survey <- read.csv("data/raw_survey_data.csv")
@@ -164,7 +164,7 @@ ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order),
         legend.text = element_text(size = 9))
 ```
 
-There's a question in the questionnaire which is "How important is it to you that making it safer and easier to bike by adding bike lanes". This helps us decide one aspect which people think causes the unsafety of riding bicycle in New York City. We plot it into a diverted bar chart. It shows that both males and females think adding bike lanes are really important, although with different degree. This indicate that the current number of bike lanes in NYC are still not enough and car accident may negatively influence the proportion of residents who would like to ride a bicycle to get around the city.
+There's a question in the questionnaire which is "How important is it to you that making it safer and easier to bike by adding bike lanes". This helps us decide one aspect which people think causes the danger of riding bicycle in New York City. We plot it into a diverted bar chart. It shows that both males and females think adding bike lanes are really important, although with different degree. This indicates that the current number of bike lanes in NYC are still not enough and car accident may negatively influence the proportion of residents who would like to ride a bicycle to get around the city.
 
 ```{r}
 important <- df_general[c(1, 2, 22, 31)] 
@@ -200,20 +200,24 @@ important <- important %>%
          `Refused` = 100 * `Refused` / Sum) %>%
   subset(select = c(1:7))
 
+important <- important[, c(6, 5, 7, 4, 3, 2, 1)]
+
 HH::likert(Gender ~ ., 
            data = important,
            positive.order = TRUE,
-           xlab = list(label = "Residents%"),
+           xlab = list(label = "Gender"),
+           ylab = list(label = "Respondents%"),
            main = 'How Important Is It to You That Making It Safer and \n Easier to Bike by Adding Bike Lanes',
            scales = list(cex = 1),
-           auto.key.in = list(cex = 0.50)) 
+           auto.key.in = list(cex = 0.8),
+           horizontal = FALSE) 
 ```
 
 
 
-## Is there any differences between the income composition of the residents choosing different transportation modes?
+## Differences between income composition of the residents choosing different transportation modes
 
-We are also interested in the possible relationship between resident's income and their mode choices. First we plot a bar chart in terms of income to quick learn about the proportion of respondents with different income. According to our interest, we recombine the income into 4 categories, which are "\$100,000 and above", "\$25,000 - \$99,999", "Less than \$24,999" and "Other". Almost half of the respondents have a year's income between $25,000 and \$99,999 and the proportions of residents with less than \$24,999 in come and those with more than \$100,000 income are roughly equal.
+We are also interested in the possible relationship between resident's income and their mode choices. First we plot a bar chart in terms of income to quick learn about the proportion of respondents with different income. According to our interest, we recombine the income into 4 categories, which are "\$100,000 and above", "\$25,000 - \$99,999", "Less than \$24,999" and "Other". Almost half of the respondents have a year's income between $25,000 and \$99,999 and the proportions of residents with less than \$24,999 income and those with more than \$100,000 income are roughly equal.
 
 ```{r}
 traveler_income <- df_general[c(1, 6, 31)]
@@ -238,13 +242,13 @@ traveler_income %>%
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
   labs(x = 'Income', y = 'Proportion', 
-       title = "Propotion of Respondents with Different Income", 
+       title = "Proportion of Respondents with Different Income", 
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_economist()+
   theme(axis.text.x = element_text(size = 8, angle = 0))
 ```
 
-Then we plot a stacked bar chart to compare the income composition between different modes. The most obvious differences include 1) the residents whose income higher than \$100,000 prefer bicycling and car more than other thansportation modes and the proportions of these two choices are roughly equal, 2) compared with other modes, the residents choosing walking and taking bus or subway are composed by more people with lower than \$24,999 income. Also, the respondents whose income are between \$25,000 and \$99,999 take a large proportion in those loving train and rail. 
+Then we plot a stacked bar chart to compare the income composition between different modes. The most obvious differences include 1) the residents whose income higher than \$100,000 prefer bicycling and car more than other transportation modes and the proportions of these two choices are roughly equal, 2) compared with other modes, the residents choosing walking and taking bus or subway are composed by more people with lower than \$24,999 income. Also, the respondents whose income are between \$25,000 and \$99,999 take a large proportion in those loving train and rail. 
 
 ```{r}
 # Transportation mode ~ Income
@@ -353,18 +357,18 @@ ggplot(describe) +
   scale_fill_manual(values=c("#4a4a4a", "#acc8d4")) +
   theme_economist() +
   guides(fill = guide_legend(reverse = TRUE)) +
-  theme(axis.text.x = element_text(size = 8, vjust = 0.5, angle = 90), 
+  theme(axis.text.x = element_text(size = 8, vjust = 0.5, angle = 45), 
         legend.position = "right", 
         legend.title = element_blank(),
         legend.text = element_text(size = 8),
         legend.key.size = unit(0.6, "cm"))
 ```
 
-Now let's back to the graph "Income Composition" and think about train and rail. There seems some difference between the proportion of people having different income. But actually we don't think it's caused by the difference between people's income directly. We suspect that it's due to the lack of subway in the region whese these residents live. Because when we are asked to choose a transportation mode, if subway and train are available meanwhile, most of us would choose subway due to its fast speed and inexpensiveness. 
+Now let's back to the graph "Income Composition" and think about train and rail. There seems some difference between the proportion of people having different income. But actually we don't think it's caused by the difference between people's income directly. We suspect that it's due to the lack of subway in the region where these residents live. Because when we are asked to choose a transportation mode, if subway and train are available meanwhile, most of us would choose subway due to its fast speed and inexpensiveness. 
 
-Let's verify this guess by plotting a bar chart of the borough distribution of the residents who prefer train and rail, and compare it with the map of New York City subway system. We also plot the borough distribution of all the residents to determine whether or not the pattern we would found is caused by the ubanlanced sampling proportion of different borough.
+Let's verify this guess by plotting a bar chart of the borough distribution of the residents who prefer train and rail, and compare it with the map of New York City subway system. We also plot the borough distribution of all the residents to determine whether or not the pattern we find is caused by the ubanlanced sampling proportion of different borough.
 
-The bar chart shows that almost 40% respondents that choosing train and rail live in Queens, higher than the sampling proportion. So this can be treated as a significant pattern. We can see from the New York City subway system map that Queens almost has no subway system, indicating that the residents living there have limited public transportation modes choices and that what we suspected has been verified. 
+The bar chart shows that almost 40% respondents that choosing train and rail live in Queens, higher than the sampling proportion. So this can be treated as a significant pattern. We can see from the New York City subway system map that Queens almost has no subway system, indicating that the residents living there have limited public transportation mode choices and that what we suspected has been verified. 
 
 ```{r}
 df_general["Borough"] <- as.data.frame(unlist(df_general$borough))
@@ -401,9 +405,9 @@ ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
 ```
 
 
-![New York City subway system map](image/subway_map.png)
+![New York City subway system map (Source: https://new.mta.info/sites/default/files/2019-10/subway_map_app_web_Oct_2019.pdf)](image/subway_map.png)
 
-## Is there any differences between the age composition of the residents choosing different transportation modes?
+## Differences between age composition of the residents choosing different transportation modes
 
 We are concerned about the choices of middle-aged residents and old residents, so we divide the respondents into two groups, below 60 years old and above 60 years old. There are 80% middle-aged respondents and almost 20% old residents.
 
@@ -424,7 +428,7 @@ age %>%
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
   labs(x = 'Age', y = 'Proportion', 
-       title = "Propotion of Respondents with Different Age", 
+       title = "Proportion of Respondents with Different Age", 
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_economist() +
   theme(axis.text.x = element_text(size = 8, angle = 0), 
@@ -434,7 +438,7 @@ age %>%
         legend.key.size = unit(0.6, "cm"))
 ```
 
-The result is consistent with what we thought. Middle-aged residents take a relative huge proportion in people who choode bicycle, while more old residents prefer taking car to get around the city due to healthy or some other issue. 
+The result is consistent with what we thought. Middle-aged residents take a relative huge proportion in people who choose bicycle, while more old residents prefer taking car to get around the city due to healthy or some other issue. 
 
 ```{r}
 age_1 <- merge(age, travel_mode) %>%
@@ -527,7 +531,7 @@ for (element in df_travel[['travel_code']])
                                %in% element){1}else{0})
   
   df_travel[['For-hire vehicle']][i] <- (if("Paratransit/ Access-A-Ride" 
-                                            %in% element | "Ride-hail service" 
+                                            %in% element | "Ride-hailing service" 
                                             %in% element | "Shared-ride service" 
                                             %in% element | "Car service"
                                             %in% element | "community van/ dollar van"
@@ -661,7 +665,7 @@ ggplot(df_transportation, aes(x = reorder(Transportation, -Rent), y = prop, fill
         legend.key.size = unit(0.6, "cm"))
 ```
 
-Similar conclusion can be drawn by analyzing the years of living in New York City variable. It's rational to purchase a car after living in New York for five years. So the "living in NYC more than 5 years" subgroup takes up most of the proportion of car riders, when the new-arriving New Yorkers show a relatively higher tendency to take taxi and Uber as well as make use of the public transportations as long as they get familiar with them.
+Similar conclusion can be drawn by analyzing the years of living in New York City variable. It's rational to purchase a car after living in New York for five years. So the "living in NYC more than 5 years" subgroup takes up most of the proportion of car riders, when the new-arriving New Yorkers show a relatively higher tendency to take taxi and Uber as well as make use of the public transportation as long as they get familiar with them.
 
 ```{r}
 df_nyc <- merge(df_travel, select(df_general, c(UniqueID, qnyc)), by = "UniqueID")
@@ -887,7 +891,7 @@ ggplot(df_transportation,aes(x = reorder(Transportation, -ord), y = prop,
 
 ## Shut in or Go out: the Effects of People's Lifestyle on their Preferences of Transportation
 
-The varibles describing the frequency people receive delivery in the survey allow us to view their choice of traveling from another intriguing angle. As online shopping, takeout food delivery and ride sharing service place an increasing effect on our daily life, people gradually accept them as a substitute for traveling. Based on intuitive understanding of the phenomenon, we assume that people's attitude and frequency of receving takeout will also be associated with certain preferences of transportations.
+The variables describing the frequency people receive delivery in the survey allow us to view their choice of traveling from another intriguing angle. As online shopping, takeout food delivery and ride sharing service place a increasing effect on our daily life, people gradually accept them as a substitute for traveling. Based on intuitive understanding of the phenomenon, we assume that people's attitude and frequency of receiving takeout will also be associated with certain preferences of transportation.
 
 ```{r}
 df_takeout <- merge(df_travel, select(df_general, c(UniqueID, 
@@ -912,21 +916,21 @@ ggplot(df_takeout %>%
   summarise(Freq = sum(allwt)),
   aes(x = reorder(qtakeout, -Freq),y = Freq)) +
   geom_col() +
-  labs(x = "Frequency of Receving Takeout Food", y = "Frequency",
-       title = "The Distribution of Respondents in Frequency of Receving Takeout Food",
+  labs(x = "Frequency of Receiving Takeout Food", y = "Frequency",
+       title = "The Distribution of Respondents in Frequency of Reeving Takeout Food",
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_economist() +
   theme(axis.text.x = element_text(size = 8, angle = 0), 
         plot.title = element_text(size = 13))
 ```
 
-First we use stacked bar chart to explore the relationship between frequency of ordering takeout food and choice of transportation. The preliminary result is quite convincing as it's consistent with our experience and intuition. For the convenience of comparison, we aggregate the level of receving delivery "daily", "most days" and "several times a week" into one group "a few times a week or more" and combine "a few times a year","never" into "seldom or never".
+First we use stacked bar chart to explore the relationship between frequency of ordering takeout food and choice of transportation. The preliminary result is quite convincing as it's consistent with our experience and intuition. For the convenience of comparison, we aggregate the level of receiving delivery "daily", "most days" and "several times a week" into one group "a few times a week or more" and combine "a few times a year","never" into "seldom or never".
 
-It can be concluded from the bar chart that people who seldom or never receive takeout food take up the majority of group who choose walking as a way to travel around the city, when people who order food delivery service a few times a week or more show a least relative tendency to walk. Similar situation happens in the "For-hire vehicle" group. Those who seldom or never receive food delivery have the lowest relative proportion in "For-hire vehicle" group when those who order a few times a week or more take up the most compared to other transportations.
+It can be concluded from the bar chart that people who seldom or never receive takeout food take up the majority of people who choose walking as a way to travel around the city, when people order food delivery service a few times a week or more show a least relative tendency to walk. Similar situation happens in the "For-hire vehicle" group. Those who seldom or never receive food delivery has the lowest relative proportion in "For-hire vehicle" group when those who order a few times a week or more taking up the most compared to other transportation.
 
-Here a "laziness effect"" can be observed. Naturally people who are reluctant to go out will also hold negative attitude towards walking. And the group of people who love ordering uber and taking taxi are also likely to choose takeout service as an alternative for going to the restaurant and having dinner. 
+Here a "laziness effect"" can be observed. Naturally people who are reluctant to go out will also hold negative attitude towards walking. And the group who love order Uber and take taxi are also likely to choose takeout service as an alternative for going to the restaurant and have dinner. 
 
-Apart from the laziness element, it's possible that the level of acceptance to new service will affect their choice of transportation and food delivery service. Respondents who use uber are also likely to use a food delivery service app. Some people may reject both and walk to a nearby restaurant to eat. 
+Apart from the laziness element, it's possible that the level of acceptance to new service will affect their choice of transportation and food delivery service. Respondents who use Uber are also likely to use a food delivery service app. Some people may reject both and walk to a nearby restaurant to eat. 
 
 We can further apply regression analysis to get the net effect of different features. Before that, a mosaic plot will help us understanding the relationship of the two variables.
 
@@ -1062,7 +1066,7 @@ ggplot(data = df_lazy) +
         legend.key.size = unit(0.6, "cm"))
 ```
 
-## How do Locations Affect Choises of Transportations?
+## How do Locations Affect Choices of Transportation?
 
 Transportation is naturally a topic highly related to space and geography elements. In this part, we extract the transportation of highest proportion in people's choices for each Zipcode and derive the "Favourite Transportation by Zipcode" variable. 
 
@@ -1087,7 +1091,7 @@ ggplot(plot_borough, aes(reorder(borough, - prop), prop)) +
   geom_col()+
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Borough", y = "Proportion", 
-       title = "The Distribution of Repondents in Different Boroughs",
+       title = "The Distribution of Respondents in Different Boroughs",
        caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
   theme_economist()+
   theme(axis.text.x = element_text(size = 8, angle = 0), 
@@ -1148,20 +1152,20 @@ for (i in c(1:nrow(df_like))){
 df_like <- df_like[-rerow,]
 
 for (i in c(1:nrow(df_like))){
-  df_like[['favourite']][i] <- unlist(strsplit(df_like[['transportation']][i],
+  df_like[['favorite']][i] <- unlist(strsplit(df_like[['transportation']][i],
                                                split = "_"))[1]
 }
 ```
 ```{r}
 plot_fav <- df_like %>% transmute(region = qzipcmb, 
-                                  value = favourite) %>%
+                                  value = favorite) %>%
   mutate(region = as.character(region))
 nyc_fips = c(36005, 36047, 36061, 36081, 36085)
 zip_choropleth(plot_fav, county_zoom = nyc_fips,
-               title = "Favourite Transportation by Zipcode",
+               title = "Favorite Transportation by Zipcode",
                num_colors = 5)+
   scale_fill_brewer(na.value = "white",
-                    guide_legend(title = "Favourite Transportation by Zipcode"))+
+                    guide_legend(title = "Favorite Transportation by Zipcode"))+
   scale_fill_manual(values = c("#4a4a4a", "#8abbd0", "purple", "#efe8d1", "#00008b"))
 ```
 
@@ -1180,12 +1184,12 @@ zip_choropleth(plot_friendly, county_zoom = nyc_fips,
                title = "Environmental Friendliness by Zipcode",
                num_colors = 5) +
   scale_fill_brewer(na.value = "white",
-                    guide_legend(title = "The Proportion Choosing\n Environmental Friendly Transportations"),
+                    guide_legend(title = "The Proportion Choosing\n Environmental Friendly Transportation"),
                     labels = c("0-0.2","0.2-0.4","0.4-0.6","0.6-0.8","0.8-1","No Data"),
                     palette="Greens")
 ```
 
-## Conversion from traditional transportations to ride hail services
+## Conversion from traditional transportation to ride hailing services
 
 ```{r}
 load("./data/tidy_survey_data.rda") # load data as survey data
@@ -1193,17 +1197,17 @@ load("./data/tidy_survey_data.rda") # load data as survey data
 tidy_survey <- tidy_survey %>% filter(!is.na(UniqueID))
 ```
 
-In this section, we will try to figure out possible factors that will help explain why people choose to use a relatively new transportation service, called ride hail services. Therefore, we will mostly focus on a subset of participants who has used this kind of services before, according to the survey results. This section will be divided into three parts. First, we will get a preliminary understanding of the preferences of ride hail services at NYC by plotting basic descriptive statistics of survey questions correlated with this service. Next, we will facet the histogram of the usage frequency by several demographic features, trying to figure out underlying correlations between them. Finally, we will compare the ride hail services with several other traditional services and make inferences of what are the most important reasons that drive people to use ride hail services at NYC. 
+In this section, we will try to figure out possible factors that will help explain why people choose to use a relatively new transportation service, called ride hailing services. Therefore, we will mostly focus on a subset of participants who has used this kind of services before, according to the survey results. This section will be divided into three parts. First, we will get a preliminary understanding of the preferences of ride hailing services at NYC by plotting basic descriptive statistics of survey questions correlated with this service. Next, we will facet the histogram of the usage frequency by several demographic features, trying to figure out underlying correlations between them. Finally, we will compare the ride hailing services with several other traditional services and make inferences of what are the most important reasons that drive people to use ride hailing services at NYC. 
 
-### Summary statistics of ride hail services
+### Summary statistics of ride hailing services
 
-In this section, we first plot several summary statistics of the usage of rail hail services at NYC, including 1) service coverage among people, i.e., how many people have used this service at least once; 2) the most popular ride hail service providers and 3) major travelling purposes of using rail hail services.
+In this section, we first plot several summary statistics of the usage of rail hailing services at NYC, including 1) service coverage among people, i.e., how many people have used this service at least once; 2) the most popular ride hailing service providers and 3) major travelling purposes of using rail hailing services.
 
-The frequency statistics are mostly collected from the result of Q28b in the survey, while the service provider data and travelling purposes data come from results of Q28a and Q28c respectively. For clarity, we first classified the frequency to two groups, namely whether or not a participant has used the ride hail service at least once before. A finer definition of frequency will be used in the next section. Note that as a particpant may choose several service providers and several travel purposes, the total sum of percentage may exceed 100%. However, each bar will still reflects how many participants choose the corresponding statement. So we will continue using this method when dealing with multiple selected options in the following parts.
+The frequency statistics are mostly collected from the result of Q28b in the survey, while the service provider data and travelling purposes data come from results of Q28a and Q28c respectively. For clarity, we first classified the frequency to two groups, namely whether or not a participant has used the ride hailing service at least once before. A finer definition of frequency will be used in the next section. Note that as a participant may choose several service providers and several travel purposes, the total sum of percentage may exceed 100%. However, each bar will still reflects how many participants choose the corresponding statement. So we will continue using this method when dealing with multiple selected options in the following parts.
 
-The upper left plot shows that more than half of people have never used ride hail services before. The upper right plot indicates that Uber and Lyft are most widely used services providers at NYC and all the other providers have quite limited share of the users. Also the size of user group of Uber is almost twice as large as that of Lyft. 
+The upper left plot shows that more than half of people have never used ride hailing services before. The upper right plot indicates that Uber and Lyft are most widely used services providers at NYC and all the other providers have quite limited share of the users. Also the size of user group of Uber is almost twice as large as that of Lyft. 
 
-The plot in the buttom shows major purposes for which users request for a ride hail service at NYC. Not surprisingly, social and personal errands make up of the majority part of ride hail services, since ride hail services are super convenient for door to door trips. It's somehow surprising that some people also use ride hail services to commute to or from work. Although we don't have the exact number of trips of every specific purpose conducted by every participant in this dataset, we can still infer that for most people, ride hail services provide another ideal way for temporary and short trips.
+The plot in the bottom shows major purposes for which users request for a ride hailing service at NYC. Not surprisingly, social and personal errands make up of the majority part of ride hailing services, since ride hailing services are super convenient for door to door trips. It's somehow surprising that some people also use ride hailing services to commute to or from work. Although we don't have the exact number of trips of every specific purpose conducted by every participant in this dataset, we can still infer that for most people, ride hailing services provide another ideal way for temporary and short trips.
 
 ```{r}
 # freq of usage 
@@ -1227,19 +1231,19 @@ users <- tidy_survey %>%
   merge(freq_df, by.x = "freq", by.y = "freq_index") %>% 
   select(c(UniqueID, allwt, freq_value))
 
-ride_hail_users <- users %>% filter(freq_value != "Never")
+ride_hailing_users <- users %>% filter(freq_value != "Never")
 
 group_by_freq <- users %>% 
                 group_by(freq_value) %>% 
-                summarise(percentage=sum(allwt) / sum(ride_hail_users$allwt)) %>% 
+                summarise(percentage=sum(allwt) / sum(ride_hailing_users$allwt)) %>% 
                 ungroup()
 ```
 
 ```{r}
-# Ride hail app usage
+# Ride hailing app usage
 app_usage <- tidy_survey %>% 
   select(c(UniqueID, "Ride Hail Services")) %>% 
-  merge(ride_hail_users) %>% 
+  merge(ride_hailing_users) %>% 
   mutate(length = lengths(`Ride Hail Services`)) %>% 
   filter(length > 0) %>% 
   mutate(avgwt = allwt) %>% 
@@ -1255,7 +1259,7 @@ app_usage_plot <- ggplot(app_usage,
                              y = wt)) +
                   geom_col() +
                   labs(x = 'App Name', y = 'Percentage',
-                       title = "Ride Hail Services App Usage") +
+                       title = "Ride hailing Services App Usage") +
                   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
                   theme_economist() +
                   theme(axis.text.x = element_text(size = 8, angle = 0),
@@ -1267,10 +1271,10 @@ app_usage_plot <- ggplot(app_usage,
 ```
 
 ```{r}
-# Ride hail purposes
+# Ride hailing purposes
 purposes <- tidy_survey %>% 
   select(c(UniqueID, "Purpose of using ride hailing app")) %>% 
-  merge(ride_hail_users) %>% 
+  merge(ride_hailing_users) %>% 
   rename(purpose = "Purpose of using ride hailing app") %>% 
   mutate(length = lengths(purpose)) %>% 
   filter(length > 0) %>% 
@@ -1290,7 +1294,7 @@ purpose_plot <- ggplot(purposes, aes(x = fct_reorder(purpose,
                 geom_col() +
                 scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
                 labs(x = 'Purposes', y = 'Percentage',
-                     title = "Purposes of Using Ride Hail Services",
+                     title = "Purposes of Using Ride hailing Services",
                      caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
                 theme_economist() +
                 theme(axis.text.x = element_text(size = 8, angle = 20, vjust = 0.5), 
@@ -1302,7 +1306,7 @@ purpose_plot <- ggplot(purposes, aes(x = fct_reorder(purpose,
 ```
 
 ```{r}
-# Whether one has used ride-hail services at least once before
+# Whether one has used ride-hailing services at least once before
 bin_freq <- users %>% 
             mutate(taken_before = ifelse(freq_value == "Never", 
                                          "Never", "At least\nonce")) %>% 
@@ -1315,10 +1319,10 @@ bin_freq_plot <- ggplot(data = bin_freq,
   geom_col() +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   labs(x = 'Usage times', y = 'Percentage',
-       title = "Ride-hail Service\nCoverage") +
+       title = "Ride-hailing Service\nCoverage") +
   theme_economist() +
-  theme(axis.text.x = element_text(size = 7, angle = 20, vjust = 0.5),
-        plot.title = element_text(size = 10),
+  theme(axis.text.x = element_text(size = 7, angle = 20, vjust = 0.8),
+        plot.title = element_text(size = 8),
         legend.position = "right", 
         legend.title = element_blank(),
         legend.text = element_text(size = 9),
@@ -1336,23 +1340,23 @@ grid.arrange(bin_freq_plot, app_usage_plot, purpose_plot,
 
 ### Factors that may influence frequency
 
-In this section, we want to investigate whether the frequency of using ride hail services are affected by the demographic features of the user, e.g., the region he / she lives, the income level and the age. For a specific feature, we will plot the conditional distribution of the frequency, given a specific value of that feature. The basic methodology here is comapring if two distributions look different under different conditions. If so, this feature may play an important role for explaining the frequency of using ride hail services. Otherwise, its role may be vague and not significant. In this section, the frequency is divided to several groups with a different time range, e.g. several times a month or several times a year, which is also how the survey question Q28b defines frequency.
+In this section, we want to investigate whether the frequency of using ride hailing services are affected by the demographic features of the user, e.g., the region he / she lives, the income level and the age. For a specific feature, we will plot the conditional distribution of the frequency, given a specific value of that feature. The basic methodology here is comparing if two distributions look different under different conditions. If so, this feature may play an important role for explaining the frequency of using ride hailing services. Otherwise, its role may be vague and not significant. In this section, the frequency is divided to several groups with a different time range, e.g. several times a month or several times a year, which is also how the survey question Q28b defines frequency.
 
 1. Region v.s. Freq
 
-The survey problem Q8 and Q9 asks for the region that the participant lives. Here we reduced all possible options to the granularity of boroughs at NYC, so there are five different regions in total. The reason why we are interested in the region feature is that different regions may have quite different transportation systems. For example, if the public transportation system is quite complete in one region, people may not use ride hail services that often, due to the higher price of each trip. Based on this assupmtion, we can plot the distribution by facetting on the region.
+The survey problem Q8 and Q9 asks for the region that the participant lives. Here we reduced all possible options to the granularity of boroughs at NYC, so there are five different regions in total. The reason why we are interested in the region feature is that different regions may have quite different transportation systems. For example, if the public transportation system is quite complete in one region, people may not use ride hailing services that often, due to the higher price of each trip. Based on this assumption, we can plot the distribution by faceting on the region.
 
 ```{r}
 regions <- tidy_survey %>% 
   select(c(UniqueID, borough)) %>% 
   unnest(borough)
 
-region_sum <- ride_hail_users %>% 
+region_sum <- ride_hailing_users %>% 
   merge(regions, by = "UniqueID") %>% 
   group_by(borough) %>% 
   summarise(sum=sum(allwt))
 
-region_freq <- ride_hail_users %>% 
+region_freq <- ride_hailing_users %>% 
   merge(regions, by = "UniqueID") %>% 
   merge(region_sum, by = "borough") %>% 
   mutate(cond_freq=allwt / sum) %>% 
@@ -1377,11 +1381,11 @@ ggplot(data = region_freq,
         legend.key.size = unit(0.6, "cm"))
 ```
 
-From the previous plot that we can notice that most people in each region tend to use ride hail services a few times a month, instead of those living on Staten island. In general, people living on Staten island take ride hail trips less often compared with residents in other boroughs, which may due to the fact that Staten island is more like an isolated region compared with the others. The Brooklyn, Manhattan and Queens boroughs show similar patterns, while residents in Manhattan take ride rail trips most frequently. Although the public transportation system is almost perfect at Manhattan, people still take ride hail trips quite a lot, which somehow contradicts our initial assumption. Another explanation for this phenomenon would be, for a busier and more crowded region, the number of active drivers would also be larger. Therefore, this may shorten the average waiting time for every ride rail trip and make this service more convenient. 
+From the previous plot that we can notice that most people in each region tend to use ride hailing services a few times a month, instead of those living on Staten island. In general, people living on Staten island take ride hailing trips less often compared with residents in other boroughs, which may due to the fact that Staten island is more like an isolated region compared with the others. The Brooklyn, Manhattan and Queens boroughs show similar patterns, while residents in Manhattan take ride rail trips most frequently. Although the public transportation system is almost perfect at Manhattan, people still take ride hailing trips quite a lot, which somehow contradicts our initial assumption. Another explanation for this phenomenon would be, for a busier and more crowded region, the number of active drivers would also be larger. Therefore, this may shorten the average waiting time for every ride rail trip and make this service more convenient. 
 
 2. Income v.s Freq
 
-Next, we want to understand how the frequency of taking ride hail trips would be influenced by the income level, as the ride hail services may cost a little more compared with traditional green or yellow taxi. The income information comes from the results of Q6 in the survey. Here we also group the income level to 5 levels, with a span of roughly $50,000 and discard those participants who refused to report their income level. 
+Next, we want to understand how the frequency of taking ride hailing trips would be influenced by the income level, as the ride hailing services may cost a little more compared with traditional green or yellow taxi. The income information comes from the results of Q6 in the survey. Here we also group the income level to 5 levels, with a span of roughly $50,000 and discard those participants who refused to report their income level. 
 
 ```{r}
 income_level <- tidy_survey %>% 
@@ -1395,7 +1399,7 @@ income_level <- tidy_survey %>%
                                  `$150,000 and above`=c("8", "9"),
                                  `Refused`=c("10", "11")))
 
-income_freq_sum <- ride_hail_users %>% 
+income_freq_sum <- ride_hailing_users %>% 
   merge(income_level, by = "UniqueID") %>% 
   select(c(fct_income, allwt)) %>% 
   filter(fct_income != "Refused") %>% 
@@ -1403,7 +1407,7 @@ income_freq_sum <- ride_hail_users %>%
   summarise(sum=sum(allwt)) %>% 
   ungroup()
   
-income_freq <- ride_hail_users %>% 
+income_freq <- ride_hailing_users %>% 
   merge(income_level %>% select(UniqueID, fct_income), by = "UniqueID") %>% 
   merge(income_freq_sum, by = "fct_income") %>% 
   mutate(cond_freq=allwt / sum) %>% 
@@ -1428,11 +1432,11 @@ ggplot(data = income_freq,
         legend.key.size = unit(0.6, "cm"))
 ```
 
-Except for the lowest income level and those who refused to declose their income level, all the other groups show quite similar distributions. For the lowest income group, the frequency distribution is more left skewed compared with the others, which indicates that people in this group will use ride rail services less often. Therefore, generally speaking, the income level is not a significant feature that influences the frequency of taking ride hail trips. From another aspect, it also reflects that the pricing rules for ride hail services are reasonable, so the price itself won't become a factor that hinder the growth of ride hail services.
+Except for the lowest income level and those who refused to disclose their income level, all the other groups show quite similar distributions. For the lowest income group, the frequency distribution is more left skewed compared with the others, which indicates that people in this group will use ride rail services less often. Therefore, generally speaking, the income level is not a significant feature that influences the frequency of taking ride hailing trips. From another aspect, it also reflects that the pricing rules for ride hailing services are reasonable, so the price itself won't become a factor that hinder the growth of ride hailing services.
 
 3. Age v.s. Freq
 
-We may also assume that ride hail services are more appealing to younger generations who are more capable of accepting new things. Therefore, we also facet on age variable in this section. We first devide the ages of all grown-ups into 6 groups, with a span of roughly 10 years in each group. We also remove those participants who refused to report their ages in this survey for clarity. The age information comes from the results of Q2 in the survey.
+We may also assume that ride hailing services are more appealing to younger generations who are more capable of accepting new things. Therefore, we also facet on age variable in this section. We first divide the ages of all grown-ups into 6 groups, with a span of roughly 10 years in each group. We also remove those participants who refused to report their ages in this survey for clarity. The age information comes from the results of Q2 in the survey.
 
 ```{r}
 map_age <- function(age_col) {
@@ -1455,12 +1459,12 @@ ages <- tidy_survey %>%
   mutate(fct_age = map_age(qage)) %>% 
   filter(fct_age != "Refused")
 
-age_sum <- ride_hail_users %>% 
+age_sum <- ride_hailing_users %>% 
   merge(ages, by = "UniqueID") %>% 
   group_by(fct_age) %>% 
   summarise(sum = sum(allwt))
 
-age_freq <- ride_hail_users %>% 
+age_freq <- ride_hailing_users %>% 
   merge(ages, by = "UniqueID") %>% 
   merge(age_sum, by = "fct_age") %>% 
   mutate(cond_prob = allwt / sum) %>% 
@@ -1485,25 +1489,25 @@ ggplot(data = age_freq,
         legend.key.size = unit(0.6, "cm"))
 ```
 
-For people younger than 55 years old, the patterns are quite similar. The majority of users in these group take ride hail trips a few times a month, and older people tend to take ride hail trip less frequently, which can be observed as the increasing ratio of people with frequency smaller than once a month. For those who are retired, the ratio of "less than a few times in a year" is the largest compared with other groups. However, it's surprising that for those great than 65 years old, over 30% of them still takes ride hail trips a few times a month. So it may indicate that the newly born ride hail services is quite user friendly with elder people. 
+For people younger than 55 years old, the patterns are quite similar. The majority of users in these group take ride hailing trips a few times a month, and older people tend to take ride hailing trip less frequently, which can be observed as the increasing ratio of people with frequency smaller than once a month. For those who are retired, the ratio of "less than a few times in a year" is the largest compared with other groups. However, it's surprising that for those great than 65 years old, over 30% of them still takes ride hailing trips a few times a month. So it may indicate that the newly born ride hailing services is quite user friendly with elder people. 
 
 4. With / Without Car v.s Freq
 
-Last, we want to check whether the access of a personal car will influence the choice of taking ride hail services. Mostly, we will guess that those without access to a car would be more likely to use ride hail services to travel around. The car access information comes from the results of Q24, and we reduce the results to two groups indicating whether a participant has access to a car.
+Last, we want to check whether the access of a personal car will influence the choice of taking ride hailing services. Mostly, we will guess that those without access to a car would be more likely to use ride hailing services to travel around. The car access information comes from the results of Q24, and we reduce the results to two groups indicating whether a participant has access to a car.
 
 ```{r}
 car_access <- tidy_survey %>% 
   select(c(UniqueID, qcaraccess)) %>% 
-  merge(ride_hail_users, by = "UniqueID") %>% 
+  merge(ride_hailing_users, by = "UniqueID") %>% 
   mutate(has_car = ifelse(qcaraccess %in% c(1,2), "Has access to a car", "No access to a car")) %>% 
   select(c(UniqueID, has_car))
 
 car_access_sum <- car_access %>%
-  merge(ride_hail_users, by = "UniqueID") %>% 
+  merge(ride_hailing_users, by = "UniqueID") %>% 
   group_by(has_car) %>% 
   summarise(sum = sum(allwt))
 
-car_access_freq <- ride_hail_users %>% 
+car_access_freq <- ride_hailing_users %>% 
   merge(car_access, by = "UniqueID") %>% 
   merge(car_access_sum, by = "has_car") %>% 
   mutate(cond_prob = allwt / sum) %>% 
@@ -1528,14 +1532,14 @@ ggplot(data = car_access_freq,
         legend.key.size = unit(0.6, "cm"))
 ```
 
-The results are quite interesting. For relatively high frerquency of using ride hail services, namely from several times a week to once a month, the ratios in the group of participants with no access to car are larger than the counterparts in the other group, indicating that those without a car will use ride hail services more frequently. For relatively low frequencies, i.e., when the frequency is calculated in the range of years, corresponsing ratios are larger in the group with car access. The general pattern of both distribution is still similar without a huge distinction. And this may come from the fact that those without cars will also use other transportation methods as a substitute and those with cars may also use ride hail services when parking is hard. 
+The results are quite interesting. For relatively high frequency of using ride hailing services, namely from several times a week to once a month, the ratios in the group of participants with no access to car are larger than the counterparts in the other group, indicating that those without a car will use ride hailing services more frequently. For relatively low frequencies, i.e., when the frequency is calculated in the range of years, corresponding ratios are larger in the group with car access. The general pattern of both distribution is still similar without a huge distinction. And this may come from the fact that those without cars will also use other transportation methods as a substitute and those with cars may also use ride hailing services when parking is hard. 
 
-### Comparison between ride-hail services and other transportations
+### Comparison between ride-hailing services and other transportation
 
-In this section, we focus on the internel reasons that a ride hail service user relies on when making choices of transportation methods. We first find out what used to be the method of transportation prior to the existence of using ride hail services. This is asked by Q28d-Q28h. By filtering out top options, we then compare the feelings and descriptions of these methods along with ride hail services given by ride hail service users, in order to find an explanation of why these transitions happen. Those descriptions are results from Q37, where the particpants were asked to select appropriate descriptions for these transportation methods. Note that a participant may select more than one feature for each transportation tool.
+In this section, we focus on the internal reasons that a ride hailing service user relies on when making choices of transportation methods. We first find out what used to be the method of transportation prior to the existence of using ride hailing services. This is asked by Q28d-Q28h. By filtering out top options, we then compare the feelings and descriptions of these methods along with ride hailing services given by ride hailing service users, in order to find an explanation of why these transitions happen. Those descriptions are results from Q37, where the participants were asked to select appropriate descriptions for these transportation methods. Note that a participant may select more than one feature for each transportation tool.
 
 ```{r}
-before_ride_hail <- tidy_survey %>% select(c(UniqueID, "Prior to Riding Hail", allwt)) %>% 
+before_ride_hailing <- tidy_survey %>% select(c(UniqueID, "Prior to Riding Hail", allwt)) %>% 
   rename("previous_travel"="Prior to Riding Hail") %>% 
   mutate(length=lengths(previous_travel)) %>%
   filter(length > 0) %>% 
@@ -1545,7 +1549,7 @@ before_ride_hail <- tidy_survey %>% select(c(UniqueID, "Prior to Riding Hail", a
   group_by(previous_travel) %>% 
   summarise(wt=sum(avgwt))
 
-before_ride_hail_groups <- before_ride_hail %>% 
+before_ride_hailing_groups <- before_ride_hailing %>% 
   mutate(group_code=fct_collapse(previous_travel, 
                                  `Car Services`=c("Carpool", "Car service", "Carshare"),
                                  `Bike / Motorcycle`=c("Citi Bike", "Electric Bike", "Motorcycle", 
@@ -1563,7 +1567,7 @@ before_ride_hail_groups <- before_ride_hail %>%
 ```
 
 ```{r}
-prior_method_plots <-  ggplot(before_ride_hail_groups, aes(x=fct_reorder(group_code, wt), y=percentage)) + 
+prior_method_plots <-  ggplot(before_ride_hailing_groups, aes(x=fct_reorder(group_code, wt), y=percentage)) + 
   geom_col() + 
   coord_flip() +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
@@ -1577,11 +1581,11 @@ prior_method_plots <-  ggplot(before_ride_hail_groups, aes(x=fct_reorder(group_c
         legend.key.size = unit(0.6, "cm"))
 ```
 
-```{r}
+```{r, echo=FALSE}
 map_type <- function(descriptions) {
   unlist(map(descriptions, function(x) {
     case_when(
-    str_detect(x, coll("Ride-hail")) ~ "Ride-hail",
+    str_detect(x, coll("Ride-hail")) ~ "Ride-hailing",
     str_detect(x, coll("Bus")) ~ "Bus",
     str_detect(x, coll("Subway")) ~ "Subway",
     str_detect(x, coll("Taxis")) ~ "Taxis",
@@ -1590,7 +1594,7 @@ map_type <- function(descriptions) {
 }
 
 prefix_table <- data.frame(
-  type=c("Ride-hail", "Bus", "Subway", "Taxis"),
+  type=c("Ride-hailing", "Bus", "Subway", "Taxis"),
   prefix=c("Ride-hail services (i.e. Uber or Lyft) ",
            "Bus ",
            "Subway ",
@@ -1598,7 +1602,7 @@ prefix_table <- data.frame(
 )
 
 reasons <- tidy_survey %>% select(c(UniqueID, Description)) %>% 
-  merge(ride_hail_users, by = "UniqueID") %>% 
+  merge(ride_hailing_users, by = "UniqueID") %>% 
   unnest(Description) %>% 
   mutate(type=map_type(Description)) %>% 
   filter(! is.na(type)) %>% 
@@ -1607,28 +1611,28 @@ reasons <- tidy_survey %>% select(c(UniqueID, Description)) %>%
   select(c(UniqueID, type, reason, allwt))
 ```
 
-```{r}
+```{r, echo=FALSE}
 reasons_group <- reasons %>% 
   mutate(reason=fct_collapse(reason, `Don't know /\nRefused`=c("Don't know", "Refused"))) %>% 
   group_by(type, reason) %>% 
   summarise(wt=sum(allwt)) %>% 
   ungroup() %>% 
-  mutate(wt=wt / sum(ride_hail_users$allwt)) %>% 
-  mutate(type=factor(type, levels = c("Ride-hail", "Bus", "Subway", "Taxis")))
+  mutate(wt=wt / sum(ride_hailing_users$allwt)) %>% 
+  mutate(type=factor(type, levels = c("Ride-hailing", "Bus", "Subway", "Taxis")))
 ```
 
 ```{r}
-reasons_ride_hail <- reasons_group %>% 
-  filter(type == "Ride-hail") %>% 
-  mutate(ride_hail_wt=wt) %>% 
-  select(c(reason, ride_hail_wt))
+reasons_ride_hailing <- reasons_group %>% 
+  filter(type == "Ride-hailing") %>% 
+  mutate(ride_hailing_wt=wt) %>% 
+  select(c(reason, ride_hailing_wt))
 
 reasons_group <- reasons_group %>% 
-  merge(reasons_ride_hail, by = "reason")
+  merge(reasons_ride_hailing, by = "reason")
 ```
 
 ```{r}
-reasons_plot <- ggplot(reasons_group, aes(x=fct_reorder(reason, ride_hail_wt), y=wt)) + 
+reasons_plot <- ggplot(reasons_group, aes(x=fct_reorder(reason, ride_hailing_wt), y=wt)) + 
   geom_point(aes(colour=type, shape=type, size=type)) +
   coord_flip() +
   xlab("Descriptions") +
@@ -1644,12 +1648,15 @@ reasons_plot <- ggplot(reasons_group, aes(x=fct_reorder(reason, ride_hail_wt), y
         plot.title = element_text(size = 13), 
         legend.position = "right", 
         legend.title = element_blank(),
-        legend.text = element_text(size = 9))
+        legend.text = element_text(size = 8))
 ```
 
 ```{r}
 grid.arrange(prior_method_plots, reasons_plot, layout_matrix = rbind(c(1,1,1,2,2,2,2)))
 ```
 
-Note that in the left plot, the top-3 methods prior to using ride hail services are bus, subway and taxi. Therefore, in the right plot, we provided the descriptions of these methods along with ride hail services. As shown in the plot, the top-3 descriptions of ride hail services are convenient, comfortable and realiable. And the margins between ride hail services and all the others are quite large for these three descriptions, so we can regard them as top reasons explaining why a user would prefer ride hail services. Also note that the only disadvantage of ride hail service is that it's more expensive than bus and railway, but users still believe that taxis are more expensive then ride hail service, which is somehow surprising. Since these plots are only based on the responses of participants who have used ride hail services at least once, there may exist a bias for ride hail services in the conclusion. However, it still reflects that users are quite satisfied with this new type of service and the user loyalty rate is high. Therefore, it's reasonable to assume that the ride hail services will still grow with all these advantages, and may even surpass traditional taxis in the future.
+Note that in the left plot, the top-3 methods prior to using ride hailing services are bus, subway and taxi. Therefore, in the right plot, we provided the descriptions of these methods along with ride hailing services. As shown in the plot, the top-3 descriptions of ride hailing services are convenient, comfortable and reliable. And the margins between ride hailing services and all the others are quite large for these three descriptions, so we can regard them as top reasons explaining why a user would prefer ride hailing services. Also note that the only disadvantage of ride hailing service is that it's more expensive than bus and railway, but users still believe that taxis are more expensive then ride hailing service, which is somehow surprising. Since these plots are only based on the responses of participants who have used ride hailing services at least once, there may exist a bias for ride hailing services in the conclusion. However, it still reflects that users are quite satisfied with this new type of service and the user loyalty rate is high. Therefore, it's reasonable to assume that the ride hailing services will still grow with all these advantages, and may even surpass traditional taxis in the future.
 
+### Conclusion
+
+From previous results in this section, we can conclude that there is still much space for the growth of ride hailing services at NYC, since as estimated from this survey, more than half of NYC residents have never used this service before. Also, different boroughs at NYC have different usage patterns of this service, and younger people seem to prefer this service than elder people. Therefore, a more personalized advertisement could be introduced in the future by taking the demographic features of a potential customer into consideration. Last but not least, ride hailing service has several advantages when compared with traditional transportation modes, except for a mild increase in price. Those features help increase customer loyalty and promote this service in the future.

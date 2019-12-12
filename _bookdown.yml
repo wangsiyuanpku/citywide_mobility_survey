@@ -4,4 +4,4 @@ language:
     chapter_name: "Chapter "
 delete_merged_file: true
 before_chapter_script: "_common.R"
-rmd_files: ['index.Rmd', 'data_sources.Rmd', 'data_transformation.Rmd', 'missing_value.Rmd', 'results.Rmd', 'travel_conversion.Rmd', 'dashboard.Rmd', 'PSet5-A.Rmd']
+rmd_files: ['index.Rmd', 'data_sources.Rmd', 'data_transformation.Rmd', 'missing_value.Rmd', 'results.Rmd', 'dashboard.Rmd', 'PSet5-A.Rmd']

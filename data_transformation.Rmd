@@ -1,4 +1,25 @@
 # Data Transformation
 
-Describe the process of getting the data into a form in which you could work with it in R.
+In this section, we will describe the process of getting the data into a form in which one
 
+could work with it in R, including importing data and data cleaning work.
+
+## Import data
+
+Since the survey result is already saved in the csv file, which we renamed as "raw_survey_data.csv" in the "data" directory. For processed datasets, we saved them in the binary form, e.g. "tidy_survey_data.rda", which can be imported into the workspace by using "load" command in R.
+
+## Issues in dataset
+
+The detailed description can be found in the "Column Info" table of "Data Dictionary.xlsx" file in the data folder. Though most columns are well defined and ready to use, we still need to deal with two specific issues:
+
+1. There are survey questions where each participant may choose several answers for a single question. The original solution that deals with it in the original data file was to encode each choice to a seperate column, where the value can only be 0 or 1. In other words, instead of assigning one column to one question, the original data file stored this problem in a binary encoding form, which is "dirty" in the sense of tabular data representation. Therefore, a more preferred representation would be merging all these columns into one column to keep the dataset "clean". An example for this issue would be Q22a-22e, which asked "Which of the following modes of transportation do you use to get around the city?", and every possible transportation mode is encoded as a binary column.
+
+2. For those columns mentioned in issue 1, the name of each choice is not contained in the csv file. Therefore, we need to query the column info in the xslx data dictionary file to get the exact name for every choice. Take Q22a-22e for example, the actual choices should be "Subway", "Local bus" etc. Fortunately, all these columns are saved in a unified form, where each choice is appended after the wording of the survey question. Therefore, only string manipulations are required to extract those choices.
+
+## Data cleaning solutions
+
+In order to solve the first issue, we create a function called "one_hot_to_factor" in "clean_data.Rmd". When providing several columns covering all possible choices of a survey question and a corresponding choices dict as input, this function can help transform all these columns into a new column using nested list as its value. The basic logic would be first combining all these column into one with binary vector as its value. Then applying this one hot mapping on the choices dict would provide a character vector for each row, which contains all choices a participant selected in this question. And we are done. Note that nested list can not be saved in a normal csv file, therefore we use a binary data file to save it. To extract value from the nested list, the "unnest" function in "dplyr" package would be of great help.
+
+For the second issue, we also create a function called "parse_column_description", which takes a prefix (i.e., the wording of a specific survey question) as input, and it will start searching for it in all column names. After removing the prefix for each matched column names, we get the choices dict required in the previous step.
+
+With these two functions, we can transform those "dirty" columns to "tidy" ones with few lines of code. There are also columns that are encoded using number as levels, e.g., qrace which stands for the race of a participant. Though not very human readable at first sight, when we plot those columns out, we can manually query the data dictionary file to transform those numbers to corresponding words or choices and show them in the plot. So we simply keep those columns in the tidy version of the dataset. The final output of this data cleaning phase is saved in "tidy_survey_data.rda" file under data folder.

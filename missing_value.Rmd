@@ -14,27 +14,27 @@ The other variables have few or no missing value on which we can perform further
 Given the condition of our data, we will mainly concentrate on these varibales:
 
 
-1.dependent varibles:
+1. dependent varibles:
 travel_code 
 description
 
-2.socioeconomic variables:
+2. socioeconomic variables:
 gender
 age
 income
 
-3.spatial varibles:
+3. spatial varibles:
 qzipcmb (zipcode)
 borough
 
-4.certain group of variables related to our topics:
+4. certain group of variables related to our topics:
 qnyc (years of living in New York City)
 qchildren (how many children do the respondents have ?)
 qrent (do the respondents own their house or rent their residence?)
 gFREIGHT varible groups (how often do the respondents recevie deliveries at home)
 
 
-5.weight:
+5. weight:
 allwt (the weight for each record, provided by the survey)
 
 In the process of exploration and analysis, we will also recode variable according to the situation and needs in analysis. The varibales we focus on generally have very few missing values. So instead of replacing them with other values, we will just exclude them when conducting analysis and plotting.
@@ -42,7 +42,6 @@ In the process of exploration and analysis, we will also recode variable accordi
 ```{r}
 library(extracat)
 visna(tidy_df,sort = "b")
-
 ```
 
 
