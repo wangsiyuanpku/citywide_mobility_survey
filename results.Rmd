@@ -401,7 +401,7 @@ ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
 ```
 
 
-![](image/subway_map.png)
+![half-size image](image/subway_map.png)
 
 ## Is there any differences between the age composition of the residents choosing different transportation modes?
 
