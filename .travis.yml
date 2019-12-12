@@ -11,7 +11,7 @@ repos:
 r_github_packages:
 - cran/extracat
 - rstudio/bookdown
-- arilamstein/choroplethrZip@v1.4.0
+- arilamstein/choroplethrZip@v1.5.0
 
 addons:
   apt:
