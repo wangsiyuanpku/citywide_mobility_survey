@@ -16,7 +16,7 @@ weight1 <- read.csv("data/weight_fill.csv")
 ```
 
 
-## Is there any differences between the gender composition of the residents choosing different transportation modes?
+## Differences between gender composition of the residents choosing different transportation modes
 
 Calculate the proportion of the respondents with different gender. There are totally 41.12% males and 58.77% females among all the respondents.
 
@@ -164,7 +164,7 @@ ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order),
         legend.text = element_text(size = 9))
 ```
 
-There's a question in the questionnaire which is "How important is it to you that making it safer and easier to bike by adding bike lanes". This helps us decide one aspect which people think causes the unsafety of riding bicycle in New York City. We plot it into a diverted bar chart. It shows that both males and females think adding bike lanes are really important, although with different degree. This indicate that the current number of bike lanes in NYC are still not enough and car accident may negatively influence the proportion of residents who would like to ride a bicycle to get around the city.
+There's a question in the questionnaire which is "How important is it to you that making it safer and easier to bike by adding bike lanes". This helps us decide one aspect which people think causes the unsafety of riding bicycle in New York City. We plot it into a diverted bar chart. It shows that both males and females think adding bike lanes are really important, although with different degree. This indicates that the current number of bike lanes in NYC are still not enough and car accident may negatively influence the proportion of residents who would like to ride a bicycle to get around the city.
 
 ```{r}
 important <- df_general[c(1, 2, 22, 31)] 
@@ -211,9 +211,9 @@ HH::likert(Gender ~ .,
 
 
 
-## Is there any differences between the income composition of the residents choosing different transportation modes?
+## Differences between income composition of the residents choosing different transportation modes
 
-We are also interested in the possible relationship between resident's income and their mode choices. First we plot a bar chart in terms of income to quick learn about the proportion of respondents with different income. According to our interest, we recombine the income into 4 categories, which are "\$100,000 and above", "\$25,000 - \$99,999", "Less than \$24,999" and "Other". Almost half of the respondents have a year's income between $25,000 and \$99,999 and the proportions of residents with less than \$24,999 in come and those with more than \$100,000 income are roughly equal.
+We are also interested in the possible relationship between resident's income and their mode choices. First we plot a bar chart in terms of income to quick learn about the proportion of respondents with different income. According to our interest, we recombine the income into 4 categories, which are "\$100,000 and above", "\$25,000 - \$99,999", "Less than \$24,999" and "Other". Almost half of the respondents have a year's income between $25,000 and \$99,999 and the proportions of residents with less than \$24,999 income and those with more than \$100,000 income are roughly equal.
 
 ```{r}
 traveler_income <- df_general[c(1, 6, 31)]
@@ -360,11 +360,11 @@ ggplot(describe) +
         legend.key.size = unit(0.6, "cm"))
 ```
 
-Now let's back to the graph "Income Composition" and think about train and rail. There seems some difference between the proportion of people having different income. But actually we don't think it's caused by the difference between people's income directly. We suspect that it's due to the lack of subway in the region whese these residents live. Because when we are asked to choose a transportation mode, if subway and train are available meanwhile, most of us would choose subway due to its fast speed and inexpensiveness. 
+Now let's back to the graph "Income Composition" and think about train and rail. There seems some difference between the proportion of people having different income. But actually we don't think it's caused by the difference between people's income directly. We suspect that it's due to the lack of subway in the region where these residents live. Because when we are asked to choose a transportation mode, if subway and train are available meanwhile, most of us would choose subway due to its fast speed and inexpensiveness. 
 
-Let's verify this guess by plotting a bar chart of the borough distribution of the residents who prefer train and rail, and compare it with the map of New York City subway system. We also plot the borough distribution of all the residents to determine whether or not the pattern we would found is caused by the ubanlanced sampling proportion of different borough.
+Let's verify this guess by plotting a bar chart of the borough distribution of the residents who prefer train and rail, and compare it with the map of New York City subway system. We also plot the borough distribution of all the residents to determine whether or not the pattern we find is caused by the ubanlanced sampling proportion of different borough.
 
-The bar chart shows that almost 40% respondents that choosing train and rail live in Queens, higher than the sampling proportion. So this can be treated as a significant pattern. We can see from the New York City subway system map that Queens almost has no subway system, indicating that the residents living there have limited public transportation modes choices and that what we suspected has been verified. 
+The bar chart shows that almost 40% respondents that choosing train and rail live in Queens, higher than the sampling proportion. So this can be treated as a significant pattern. We can see from the New York City subway system map that Queens almost has no subway system, indicating that the residents living there have limited public transportation mode choices and that what we suspected has been verified. 
 
 ```{r}
 df_general["Borough"] <- as.data.frame(unlist(df_general$borough))
@@ -403,7 +403,7 @@ ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
 
 ![New York City subway system map](image/subway_map.png)
 
-## Is there any differences between the age composition of the residents choosing different transportation modes?
+## Differences between age composition of the residents choosing different transportation modes
 
 We are concerned about the choices of middle-aged residents and old residents, so we divide the respondents into two groups, below 60 years old and above 60 years old. There are 80% middle-aged respondents and almost 20% old residents.
 
@@ -434,7 +434,7 @@ age %>%
         legend.key.size = unit(0.6, "cm"))
 ```
 
-The result is consistent with what we thought. Middle-aged residents take a relative huge proportion in people who choode bicycle, while more old residents prefer taking car to get around the city due to healthy or some other issue. 
+The result is consistent with what we thought. Middle-aged residents take a relative huge proportion in people who choose bicycle, while more old residents prefer taking car to get around the city due to healthy or some other issue. 
 
 ```{r}
 age_1 <- merge(age, travel_mode) %>%
