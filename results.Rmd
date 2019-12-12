@@ -357,7 +357,7 @@ ggplot(describe) +
   scale_fill_manual(values=c("#4a4a4a", "#acc8d4")) +
   theme_economist() +
   guides(fill = guide_legend(reverse = TRUE)) +
-  theme(axis.text.x = element_text(size = 8, vjust = 0.5, angle = 90), 
+  theme(axis.text.x = element_text(size = 8, vjust = 0.5, angle = 45), 
         legend.position = "right", 
         legend.title = element_blank(),
         legend.text = element_text(size = 8),
