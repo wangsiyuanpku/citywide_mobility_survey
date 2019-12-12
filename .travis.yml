@@ -11,11 +11,21 @@ repos:
 r_github_packages:
 - cran/extracat
 - rstudio/bookdown
+- arilamstein/choroplethrZip@v1.5.0
+
+addons:
+  apt:
+    packages:
+      - libudunits2-dev
+      - libgdal-dev
+      - libmpfr-dev
+
 
 script:
 - Rscript -e 'bookdown::render_book("index.Rmd")'
 - cp dashboard/main.js _book/dashboard
 - cp dashboard/loader.css _book/dashboard
+
 deploy:
   provider: pages
   local_dir: _book
@@ -24,6 +34,7 @@ deploy:
   github_token: $GITHUB_PAT
   on:
     branch: master
+    
 env:
   global:
     secure: YixG/Kik8QJD9Giq1jASGRKZLV6DBBFARTXlPb+t5hmYX/du7CiBS73Dy3UJWdPIgFrNhNJ87paxYf6JO7vLfTelXX8UhsxzJdzEcs5NvDZGSUPCq/itMi6NdhgneuKZ6Gx2OwHGx5c1xhPWwDTzcb3Xn2xDiF5nFOTuLhIH2EXX12TzcWLSuT/DXgcJASW+99gvc+f+loDipi7boJYWR2RVFgqEBTEMJmbRRNg4eXSE+zzZU5qb7fcJL4hB16wgjxlRdDcaG3xN8ihGOtpd9JnNvqQv7aRP/vTiwrRNoxL7LubTfvHZBBEgOYGCxa5Y7irU/RaXWJZNIL5bJiQmJ+pq6Oe0hIO7sfxTMwkclInulrvKKUAz3QbqvQZTr3Xa9v5grAn0mmUO2T0X7uLDKiO3BYGCtPBm9XymNipFO7wrolzCyxWteujuSGgBjpCBJD9Vr6aFsRV/NGEhPSDhGildAq7nO6WthoI/Q0FeuPiYUzHFdtcqE9luVbETN3Yqky5l3W983zhUmzdWA/hfJGKSVHaXZRL9ld7aVD7ARbxzPbRIIIdGQr3UMQYT2WUbzZGfVBUyElxuJQXIpB3vw7gFiQhBKtXF15v58vDtKFJxQiOPsOJ64l4VYbv7v/R2ut7PkNUklxWQW7KPsoa+APp1TmQBLMegXM4eSFISwA8=
