@@ -8,6 +8,8 @@ Imports:
   ggthemes, 
   parcoords, 
   d3r,
-  ggmosaic
+  ggmosaic,
+  choroplethr,
+  choroplethrMaps
 Remotes: 
   rstudio/bookdown
