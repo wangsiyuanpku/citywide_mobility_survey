@@ -401,7 +401,7 @@ ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
 ```
 
 
-![New York City subway system map](image/subway_map.png)
+![New York City subway system map (Source: https://new.mta.info/sites/default/files/2019-10/subway_map_app_web_Oct_2019.pdf)](image/subway_map.png)
 
 ## Differences between age composition of the residents choosing different transportation modes
 
