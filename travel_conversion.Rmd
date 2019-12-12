@@ -310,7 +310,7 @@ The results are quite interesting. For relatively high frerquency of using ride 
 
 In this section, we focus on the internel reasons that a ride hail service user relies on when making choices of transportation methods. We first find out what used to be the method of transportation prior to the existence of using ride hail services. This is asked by Q28d-Q28h. By filtering out top options, we then compare the feelings and descriptions of these methods along with ride hail services given by ride hail service users, in order to find an explanation of why these transitions happen. Those descriptions are results from Q37, where the particpants were asked to select appropriate descriptions for these transportation methods. Note that a participant may seelct more than one feature for each transportation tool.
 
-```{r}
+```{r, echo=FALSE}
 before_ride_hail <- tidy_survey %>% select(c(UniqueID, "Prior to Riding Hail", allwt)) %>% 
   rename("previous_travel"="Prior to Riding Hail") %>% 
   mutate(length=lengths(previous_travel)) %>%
@@ -338,7 +338,7 @@ before_ride_hail_groups <- before_ride_hail %>%
   mutate(percentage=wt/sum(wt))
 ```
 
-```{r}
+```{r, echo=FALSE}
 prior_method_plots <-  ggplot(before_ride_hail_groups, aes(x=fct_reorder(group_code, wt), y=percentage)) + 
   geom_col() + 
   coord_flip() +
@@ -349,7 +349,7 @@ prior_method_plots <-  ggplot(before_ride_hail_groups, aes(x=fct_reorder(group_c
   theme_bw()
 ```
 
-```{r}
+```{r, echo=FALSE}
 map_type <- function(descriptions) {
   unlist(map(descriptions, function(x) {
     case_when(
@@ -379,7 +379,7 @@ reasons <- tidy_survey %>% select(c(UniqueID, Description)) %>%
   select(c(UniqueID, type, reason, allwt))
 ```
 
-```{r}
+```{r, echo=FALSE}
 reasons_group <- reasons %>% 
   mutate(reason=fct_collapse(reason, `Don't know /\nRefused`=c("Don't know", "Refused"))) %>% 
   group_by(type, reason) %>% 
@@ -389,7 +389,7 @@ reasons_group <- reasons %>%
   mutate(type=factor(type, levels = c("Ride-hail", "Bus", "Subway", "Taxis")))
 ```
 
-```{r}
+```{r, echo=FALSE}
 reasons_ride_hail <- reasons_group %>% 
   filter(type == "Ride-hail") %>% 
   mutate(ride_hail_wt=wt) %>% 
@@ -399,7 +399,7 @@ reasons_group <- reasons_group %>%
   merge(reasons_ride_hail, by = "reason")
 ```
 
-```{r}
+```{r, echo=FALSE}
 reasons_plot <- ggplot(reasons_group, aes(x=fct_reorder(reason, ride_hail_wt), y=wt)) + 
   geom_point(aes(colour=type, shape=type, size=type)) +
   coord_flip() +
@@ -411,7 +411,7 @@ reasons_plot <- ggplot(reasons_group, aes(x=fct_reorder(reason, ride_hail_wt), y
   theme_bw()
 ```
 
-```{r}
+```{r, echo=FALSE}
 grid.arrange(prior_method_plots, reasons_plot, layout_matrix = rbind(c(1,1,1,2,2,2,2)))
 ```
 
