@@ -5,7 +5,7 @@ Describe any patterns you discover in missing values.
 Data Quality
 
 ```{r}
-load("tidy_survey_data.rda")
+load("data/tidy_survey_data.rda")
 tidy_df <- tidy_survey %>%
   select(UniqueID,	qgender,	qage,	qrace,	qeducation,	qincome,	qzipcmb,	qSurveyZone,	borough,	travel_code,	qlicense,	gFREIGHT1_qFREIGHT1_mA,gFREIGHT1_qFREIGHT2_mA,gFREIGHT1_qFREIGHT3_mA,gFREIGHT1_qFREIGHT4_mA,gFREIGHTnew,	qsafety1,	qsafety2,	qsafety3,	qsafety4,	qsafety5,	qsafety6,	Description,gIMPROVE1_qIMPROVE1_mA,gIMPROVE1_qIMPROVE2_mA,gIMPROVE1_qIMPROVE3_mA,gIMPROVE1_qIMPROVE4_mA, gIMPROVE1_qIMPROVE5_mA,	qmarried,	qsmartphone,	qrent,	qnyc,	qchildren,	qemployment,	qzipwork1,	qzipwork2,	qzipwork3,	qzipwork4,	qzipwork5,	qzipwork6,	qtimework1,	qtimework2,	qtimework3,	qtimework4,	qtimework5,	qtimework6,	qtimehome1,	qtimehome2,	qtimehome3,	qtimehome4,	qtimehome5,	qtimehome6,	qindustry,	`Work Place`,	allwt) %>% filter(!is.na(UniqueID))
 ```
