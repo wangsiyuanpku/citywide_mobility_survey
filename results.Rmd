@@ -6,8 +6,9 @@ library(ggthemes)
 library(ggmosaic)
 library(choroplethr)
 library(choroplethrZip)
-load("data/travel_data.rda")  # df_travel
-load("data/mobility_general.rda")  # df_general
+
+load("data/travel_data.rda")
+load("data/mobility_general.rda") 
 load("data/tidy_survey_data.rda")  
 weight <- read.csv("data/weight.csv")
 weight1 <- read.csv("data/weight_fill.csv")
@@ -1015,8 +1016,10 @@ ggplot(data = df_lazy) +
 
 Transportation is naturally a topic highly related to space and geography elements. In this part, we extract the transportation of highest proportion in people's choices for each Zipcode and derive the "favourtie transportation by Zipcode" variable. 
 
-From the choropleth, we can see that a majority of blocks in New York City choose Subway as their favourtie way of transportation, which include most areas of Queens and Brooklyn, Manhattan Uptown and the South Bronx. From the MTA subway map we can see these are also the areas where subway lines are constructed in high density. 
-As there are not so many subway lines in Staten Island, people use car as a major way of traveling, which is also the case for some areas in Bronx and Long Island as they are far from the center of NYC so car is needed for commute and mobility.
+From the choropleth, we can see that a majority of blocks in New York City choose Subway as their favourate way of transportation, which include most areas of Queens and Brooklyn, Manhattan Uptown and the South Bronx. From the New York City subway system map we can see these are also the areas where subway lines are constructed in high density. 
+
+As there are not so many subway lines in Staten Island, people use car as a major way of traveling, which is also the case for some areas in Bronx and Long Island as they are far from the center of NYC, so car is needed for commute and mobility.
+
 Interestingly, people living in downtown of Manhattan and some parts of Brooklyn choose walking as their favourite way of transportation. It may be realted to the density of commerial activities so that people do not have to travel long distance to meet their daily needs. As they live in the center of the city, it's unnecessary to take subway or drive a car to their workplaces.
 
 ```{r}
@@ -1075,14 +1078,15 @@ df_envir$friendly[i] <- sum(df_envir$Walk_Freq[i],
 ```
 
 ```{r}
-df_like <- select(df_envir,-c(friendly))
-df_like<-df_like%>% gather(key = "transportation", value = "freq", -qzipcmb)%>%
-  group_by(qzipcmb)%>%
-  mutate(max = max(freq))%>%
+df_like <- select(df_envir, -c(friendly))
+df_like <- df_like %>% 
+  gather(key = "transportation", value = "freq", -qzipcmb) %>%
+  group_by(qzipcmb) %>%
+  mutate(max = max(freq)) %>%
   filter(freq == max)
 df_like <- df_like[order(df_like$qzipcmb),]
 rerow <- c()
-df_dup <- df_like[duplicated(df_like$qzipcmb,fromLast = FALSE),]
+df_dup <- df_like[duplicated(df_like$qzipcmb, fromLast = FALSE),]
 for (i in c(1:nrow(df_like))){
   if (df_like[['qzipcmb']][i] %in% df_dup[['qzipcmb']]){
     df_temp <- df_dup%>%filter(qzipcmb == df_like[['qzipcmb']][i])
@@ -1094,31 +1098,39 @@ for (i in c(1:nrow(df_like))){
 df_like <- df_like[-rerow,]
 
 for (i in c(1:nrow(df_like))){
-  df_like[['favourite']][i] <- unlist(strsplit(df_like[['transportation']][i],split = "_"))[1]
+  df_like[['favourite']][i] <- unlist(strsplit(df_like[['transportation']][i],
+                                               split = "_"))[1]
 }
 ```
 ```{r}
-plot_fav <- df_like%>%transmute(region=qzipcmb,value=favourite)%>%
-  mutate(region=as.character(region))
+plot_fav <- df_like %>% transmute(region = qzipcmb, 
+                                  value = favourite) %>%
+  mutate(region = as.character(region))
 nyc_fips = c(36005, 36047, 36061, 36081, 36085)
-zip_choropleth(plot_fav,county_zoom = nyc_fips,title = "Favourite Transportation by Zipcode",num_colors = 5)+
+zip_choropleth(plot_fav, county_zoom = nyc_fips,
+               title = "Favourite Transportation by Zipcode", num_colors = 5)+
   scale_fill_brewer(na.value = "white",
                     guide_legend(title = "Favourite Transportation by Zipcode"))+
-  scale_fill_manual(values=c("#4a4a4a","#8abbd0","purple","#efe8d1","#00008b"))
+  scale_fill_manual(values = c("#4a4a4a", "#8abbd0", "purple", "#efe8d1", "#00008b"))
 ```
 
 As a result of difference in infrastructure construction and urban area function, people in different boroughs and locations of the city form different preference for transportations.
+
 From a environmental perspective, we draw the choropleth for the proportion of people choosing a low-carbon way of traveling. In our definition, those who take subway and other public transportation service as well as people who choose walking and riding bicycle will all be considered as the environment-friendly group in term of traveling.
+
 The result is consistent with what we find in the last graph. People living in Manhattan and parts of Brooklyn have the highest proportion in environmental friendliness, as a result of their preferences for subway. Staten Island gets a relatively low score since there are few subway lines so car becomes the first choice of traveling.
 
 ```{r}
-plot_friendly <- df_envir%>%transmute(region=qzipcmb,value=friendly)%>%
-  mutate(region=as.character(region))
+plot_friendly <- df_envir %>%
+  transmute(region = qzipcmb,value = friendly) %>%
+  mutate(region = as.character(region))
 nyc_fips = c(36005, 36047, 36061, 36081, 36085)
-zip_choropleth(plot_friendly,county_zoom = nyc_fips,title = "Environmental Friendliness by Zipcode",num_colors = 5)+
+zip_choropleth(plot_friendly, county_zoom = nyc_fips,
+               title = "Environmental Friendliness by Zipcode",
+               num_colors = 5) +
   scale_fill_brewer(na.value = "white",
                     guide_legend(title = "The Proportion Choosing\n Environmental Friendly Transportations"),
-                    labels = c("0-0.2","0.2-0.4","0.4-0.6","0.6-0.8","0.8-1","No Data"),palette="Greens")
-
+                    labels = c("0-0.2","0.2-0.4","0.4-0.6","0.6-0.8","0.8-1","No Data"),
+                    palette="Greens")
 ```
 
