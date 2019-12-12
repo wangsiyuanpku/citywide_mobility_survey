@@ -7,6 +7,11 @@ cache:
 repos:
   cran: http://cran.rstudio.com
   rforge: http://R-Forge.R-project.org
+
+r_github_packages:
+- cran/extracat
+- rstudio/bookdown
+
 script:
 - Rscript -e 'bookdown::render_book("index.Rmd")'
 - cp dashboard/main.js _book/dashboard
