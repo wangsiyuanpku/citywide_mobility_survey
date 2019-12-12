@@ -209,7 +209,7 @@ HH::likert(Gender ~ .,
            ylab = list(label = "Respondents%"),
            main = 'How Important Is It to You That Making It Safer and \n Easier to Bike by Adding Bike Lanes',
            scales = list(cex = 1),
-           auto.key.in = list(cex = 0.90),
+           auto.key.in = list(cex = 0.8),
            horizontal = FALSE) 
 ```
 
