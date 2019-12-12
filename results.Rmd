@@ -1158,7 +1158,7 @@ for (i in c(1:nrow(df_like))){
 ```
 ```{r}
 plot_fav <- df_like %>% transmute(region = qzipcmb, 
-                                  value = favourite) %>%
+                                  value = favorite) %>%
   mutate(region = as.character(region))
 nyc_fips = c(36005, 36047, 36061, 36081, 36085)
 zip_choropleth(plot_fav, county_zoom = nyc_fips,
