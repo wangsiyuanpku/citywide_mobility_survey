@@ -869,3 +869,256 @@ ggplot(df_takeout %>%
         plot.title = element_text(size = 13))
 ```
 
+First we use stacked bar chart to explore the relationship between frequency of ordering takeout food and choice of transportation. The preliminary result is quite convincing as it's consistent with our experience and intuition. For the convenience of comparison, we aggregate the level of receving delivery "daily", "most days" and "several times a week" into one group "a few times a week or more" and combine "a few times a year","never" into "seldom or never".
+
+It can be concluded from the bar chart that people who seldom or never receive takeout food take up the majority of people who choose walking as a way to travel around the city, when people order food delivery service a few times a week or more show a least relative tendency to walk. Similar situation happens in the "For-hire vehicle" group. Those who seldom or never receive food delivery has the lowest relative proportion in "For-hire vehicle" group when those who order a few times a week or more takeing up the most compared to other transportations.
+
+Here a "laziness effect"" can be observed. Naturally people who are reluctant to go out will also hold negative attitude towards walking. And the group who love order uber and take taxi are also likely to choose takeout service as an alternative for going to the restaurant and have dinner. 
+
+Apart from the laziness element, it's possible that the level of acceptance to new service will affect their choice of transportation and food delivery service. Respondents who use uber are also likely to use a food delivery service app. Some people may reject both and walk to a nearby restaurant to eat. 
+
+We can further apply regression analysis to get the net effect of different features. Before that, a mosaic plot will help us understanding the relationship of the two variables.
+
+```{r}
+df_walk <- df_takeout %>%
+  group_by(Walk, qtakeout) %>%
+  summarise(Freq = sum(Walk * weight_fill)) %>%
+  ungroup() %>%
+  filter(Walk != 0) %>%
+  mutate(Walk = "Walk") %>%
+  rename(Transportation = Walk)
+df_subway <- df_takeout %>%
+  group_by(Subway,qtakeout) %>%
+  summarise(Freq = sum(Subway * weight_fill)) %>%
+  ungroup() %>%
+  filter(Subway != 0) %>%
+  mutate(Subway = "Subway") %>%
+  rename(Transportation = Subway)
+df_Bus <- df_takeout %>%
+  group_by(Bus,qtakeout) %>%
+  summarise(Freq = sum(Bus * weight_fill)) %>%
+  ungroup() %>%
+  filter(Bus != 0) %>%
+  mutate(Bus = "Bus") %>%
+  rename(Transportation = Bus)
+df_Ferry <- df_takeout %>%
+  group_by(Ferry,qtakeout) %>%
+  summarise(Freq = sum(Ferry * weight_fill)) %>%
+  ungroup() %>%
+  filter(Ferry != 0) %>%
+  mutate(Ferry = "Ferry") %>%
+  rename(Transportation = Ferry)
+df_Train_Rail <- df_takeout %>%
+  group_by(`Train&Rail`, qtakeout) %>%
+  summarise(Freq = sum(`Train&Rail` * weight_fill)) %>%
+  ungroup() %>%
+  filter(`Train&Rail` != 0) %>%
+  mutate(`Train&Rail` = "Train&Rail") %>%
+  rename(Transportation = `Train&Rail`)
+df_Bicycle <- df_takeout %>% 
+  group_by(Bicycle, qtakeout) %>%
+  summarise(Freq = sum(Bicycle * weight_fill)) %>%
+  ungroup() %>%
+  filter(Bicycle != 0) %>%
+  mutate(Bicycle = "Bicycle") %>%
+  rename(Transportation = Bicycle)
+df_Car <- df_takeout %>%
+  group_by(Car, qtakeout) %>%
+  summarise(Freq = sum(Car * weight_fill)) %>%
+  ungroup() %>%
+  filter(Car != 0) %>%
+  mutate(Car = "Car") %>%
+  rename(Transportation = Car)
+df_For_hire_vehicle <- df_takeout %>%
+  group_by(`For-hire vehicle`, qtakeout) %>%
+  summarise(Freq = sum(`For-hire vehicle` * weight_fill)) %>%
+  ungroup() %>%
+  filter(`For-hire vehicle` != 0) %>%
+  mutate(`For-hire vehicle` = "For-hire vehicle") %>%
+  rename(Transportation = `For-hire vehicle`)
+
+df_transportation <- data.frame()
+df_transportation <- bind_rows(list(df_walk, df_subway, df_Bus, df_Ferry,
+                                    df_Train_Rail, df_Bicycle, df_Car,
+                                    df_For_hire_vehicle))
+
+df_transportation <- df_transportation %>%
+  group_by(Transportation) %>%
+  mutate(prop = Freq/sum(Freq), total = sum(Freq), 
+         ord = prop[4])
+
+
+ggplot(df_transportation, aes(x = reorder(Transportation, -ord), 
+                              y = prop, 
+                              fill = factor(qtakeout, c("Others", "Seldom or never",
+                                                        "A few times a month", 
+                                                        "A few times a week or more")),
+                              na.rm = TRUE)) +
+  geom_col() +
+  scale_fill_manual(values = c("floralwhite", "#efe8d1", "#acc8d4", "#4a4a4a")) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Transportation", y = "Proportion", 
+       title = "Frequency of Receiving Takeout Food Composition",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 8),
+        legend.position = "right",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+Now we can observed the association more clearly. People with a higher tendency to use for-hired vehicle are also willing to choose takout dilivery service. That's probably a reason why Uber also develop Uber Eats as the customers are somehow overlapped.
+
+```{r}
+df_lazy <- select(df_general, c(UniqueID, gFREIGHT1_qFREIGHT2_mA,
+                                weight_fill))
+df_lazy<- merge(df_lazy, select(df_travel, c(UniqueID, `For-hire vehicle`)),
+                by = "UniqueID")
+df_lazy<- df_lazy %>%
+  filter(gFREIGHT1_qFREIGHT2_mA %in% c(1, 2, 3, 4, 5, 6, 7, 8)) %>%
+  mutate(qtakeout = recode(gFREIGHT1_qFREIGHT2_mA, 
+                           `1` = "A few times a week or more", 
+                           `2` = "A few times a week or more",
+                           `3` = "A few times a week or more", 
+                           `4` = "A few times a month", 
+                           `5` = "Seldom or never", 
+                           `6` = "Seldom or never", 
+                           `7` = "Others", 
+                           `8` = "Others"), 
+         `For-hire vehicle` = recode(`For-hire vehicle`, `0` = "no",
+                                     `1` = "yes")) %>%
+  filter(qtakeout != "Others" & !is.na(qtakeout)) %>%
+  mutate(qtakeout = as.factor(qtakeout), 
+         for_hire_vehicle = as.factor(`For-hire vehicle`))
+  
+df_lazy$qtakeout <- factor(df_lazy$qtakeout, c("A few times a week or more",
+                                               "A few times a month","Seldom or never"))
+
+ggplot(data = df_lazy) +
+  geom_mosaic(aes(x = product(qtakeout, for_hire_vehicle), weight = weight_fill, 
+                  fill = qtakeout, na.rm = TRUE)) +
+  scale_fill_manual(values=c("#4a4a4a", "#acc8d4", "#efe8d1")) + 
+  labs(x = "Choose For-hired Vehicle or Not", y = "Frequency of Receiving Takeout Food",
+       title = 'Do People Taking For-hired Vehicles\n More Likely to Order Takeout?',
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist() +
+  guides(fill = guide_legend(reverse = TRUE))+
+  theme(axis.text.x = element_text(size = 8, vjust = 0.5, angle = 0), 
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+## How do Locations Affect Choises of Transportations?
+
+Transportation is naturally a topic highly related to space and geography elements. In this part, we extract the transportation of highest proportion in people's choices for each Zipcode and derive the "favourtie transportation by Zipcode" variable. 
+
+From the choropleth, we can see that a majority of blocks in New York City choose Subway as their favourtie way of transportation, which include most areas of Queens and Brooklyn, Manhattan Uptown and the South Bronx. From the MTA subway map we can see these are also the areas where subway lines are constructed in high density. 
+As there are not so many subway lines in Staten Island, people use car as a major way of traveling, which is also the case for some areas in Bronx and Long Island as they are far from the center of NYC so car is needed for commute and mobility.
+Interestingly, people living in downtown of Manhattan and some parts of Brooklyn choose walking as their favourite way of transportation. It may be realted to the density of commerial activities so that people do not have to travel long distance to meet their daily needs. As they live in the center of the city, it's unnecessary to take subway or drive a car to their workplaces.
+
+```{r}
+df_borough <- select(df_general, c(UniqueID, borough, allwt))
+df_borough["borough"] <- as.character(df_borough[["borough"]])
+df_borough$borough <- as.factor(df_borough$borough)
+
+plot_borough <- df_borough %>%
+  group_by(borough)%>%
+  summarise(gtotal = sum(allwt))%>%
+  mutate(prop = gtotal/sum(gtotal))%>%
+  filter(prop >= 0.01)
+
+ggplot(plot_borough, aes(reorder(borough, - prop), prop)) +
+  geom_col()+
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Borough", y = "Proportion", 
+       title = "The Distribution of Repondents in Different Boroughs",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist()+
+  theme(axis.text.x = element_text(size = 8, angle = 0), 
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+```{r}
+df_zip <- merge(df_travel, select(df_general, c(UniqueID, qzipcmb)))
+df_envir <- df_zip %>%
+  group_by(qzipcmb) %>%
+  summarise(Walk_Freq = sum(weight_fill * Walk), 
+            Subway_Freq = sum(weight_fill * Subway), 
+            Bus_Freq = sum(weight_fill * Bus),
+            Train_Rail_Freq = sum(weight_fill * `Train&Rail`),
+            Ferry_Freq = sum(weight_fill * Ferry),
+            Bicycle_Freq = sum(weight_fill * Bicycle),
+            Car_Freq = sum(weight_fill * Car),
+            `for-hire vehicle_Freq` = sum(weight_fill * `For-hire vehicle`))
+
+for (i in c(1:nrow(df_envir))){
+df_envir$friendly[i] <- sum(df_envir$Walk_Freq[i],
+                            df_envir$Subway_Freq[i],
+                            df_envir$Bus_Freq[i],
+                            df_envir$Train_Rail_Freq[i],
+                            df_envir$Ferry_Freq[i],
+                            df_envir$Bicycle_Freq[i])/sum(df_envir$Walk_Freq[i],
+                                                          df_envir$Subway_Freq[i],
+                                                          df_envir$Bus_Freq[i],
+                                                          df_envir$Train_Rail_Freq[i],
+                                                          df_envir$Ferry_Freq[i],
+                                                          df_envir$Bicycle_Freq[i],
+                                                          df_envir$Car_Freq[i],
+                                                          df_envir$`for-hire vehicle_Freq`[i])
+}
+```
+
+```{r}
+df_like <- select(df_envir,-c(friendly))
+df_like<-df_like%>% gather(key = "transportation", value = "freq", -qzipcmb)%>%
+  group_by(qzipcmb)%>%
+  mutate(max = max(freq))%>%
+  filter(freq == max)
+df_like <- df_like[order(df_like$qzipcmb),]
+rerow <- c()
+df_dup <- df_like[duplicated(df_like$qzipcmb,fromLast = FALSE),]
+for (i in c(1:nrow(df_like))){
+  if (df_like[['qzipcmb']][i] %in% df_dup[['qzipcmb']]){
+    df_temp <- df_dup%>%filter(qzipcmb == df_like[['qzipcmb']][i])
+    if(df_like[['transportation']][i] %in% df_temp[['transportation']]){
+      rerow <- append(rerow,i)
+    }
+  }
+}
+df_like <- df_like[-rerow,]
+
+for (i in c(1:nrow(df_like))){
+  df_like[['favourite']][i] <- unlist(strsplit(df_like[['transportation']][i],split = "_"))[1]
+}
+```
+```{r}
+plot_fav <- df_like%>%transmute(region=qzipcmb,value=favourite)%>%
+  mutate(region=as.character(region))
+nyc_fips = c(36005, 36047, 36061, 36081, 36085)
+zip_choropleth(plot_fav,county_zoom = nyc_fips,title = "Favourite Transportation by Zipcode",num_colors = 5)+
+  scale_fill_brewer(na.value = "white",
+                    guide_legend(title = "Favourite Transportation by Zipcode"))+
+  scale_fill_manual(values=c("#4a4a4a","#8abbd0","purple","#efe8d1","#00008b"))
+```
+
+As a result of difference in infrastructure construction and urban area function, people in different boroughs and locations of the city form different preference for transportations.
+From a environmental perspective, we draw the choropleth for the proportion of people choosing a low-carbon way of traveling. In our definition, those who take subway and other public transportation service as well as people who choose walking and riding bicycle will all be considered as the environment-friendly group in term of traveling.
+The result is consistent with what we find in the last graph. People living in Manhattan and parts of Brooklyn have the highest proportion in environmental friendliness, as a result of their preferences for subway. Staten Island gets a relatively low score since there are few subway lines so car becomes the first choice of traveling.
+
+```{r}
+plot_friendly <- df_envir%>%transmute(region=qzipcmb,value=friendly)%>%
+  mutate(region=as.character(region))
+nyc_fips = c(36005, 36047, 36061, 36081, 36085)
+zip_choropleth(plot_friendly,county_zoom = nyc_fips,title = "Environmental Friendliness by Zipcode",num_colors = 5)+
+  scale_fill_brewer(na.value = "white",
+                    guide_legend(title = "The Proportion Choosing\n Environmental Friendly Transportations"),
+                    labels = c("0-0.2","0.2-0.4","0.4-0.6","0.6-0.8","0.8-1","No Data"),palette="Greens")
+
+```
+
