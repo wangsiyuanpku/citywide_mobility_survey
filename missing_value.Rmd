@@ -1,9 +1,5 @@
 # Missing Value
 
-Describe any patterns you discover in missing values.
-
-Data Quality
-
 ```{r}
 load("data/tidy_survey_data.rda")
 tidy_df <- tidy_survey %>%
