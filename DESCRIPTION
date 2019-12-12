@@ -10,7 +10,6 @@ Imports:
   d3r,
   ggmosaic,
   choroplethr,
-  choroplethrMaps,
-  choroplethrZip
+  choroplethrMaps
 Remotes: 
   rstudio/bookdown
