@@ -2,3 +2,46 @@
 
 Describe any patterns you discover in missing values.
 
+Data Quality
+
+```{r}
+load("data/tidy_survey_data.rda")
+tidy_df <- tidy_survey %>%
+  select(UniqueID,	qgender,	qage,	qrace,	qeducation,	qincome,	qzipcmb,	qSurveyZone,	borough,	travel_code,	qlicense,	gFREIGHT1_qFREIGHT1_mA,gFREIGHT1_qFREIGHT2_mA,gFREIGHT1_qFREIGHT3_mA,gFREIGHT1_qFREIGHT4_mA,gFREIGHTnew,	qsafety1,	qsafety2,	qsafety3,	qsafety4,	qsafety5,	qsafety6,	Description,gIMPROVE1_qIMPROVE1_mA,gIMPROVE1_qIMPROVE2_mA,gIMPROVE1_qIMPROVE3_mA,gIMPROVE1_qIMPROVE4_mA, gIMPROVE1_qIMPROVE5_mA,	qmarried,	qsmartphone,	qrent,	qnyc,	qchildren,	qemployment,	qzipwork1,	qzipwork2,	qzipwork3,	qzipwork4,	qzipwork5,	qzipwork6,	qtimework1,	qtimework2,	qtimework3,	qtimework4,	qtimework5,	qtimework6,	qtimehome1,	qtimehome2,	qtimehome3,	qtimehome4,	qtimehome5,	qtimehome6,	qindustry,	`Work Place`,	allwt) %>% filter(!is.na(UniqueID))
+```
+
+The first step to explore the data is to analyze its missing pattern. We use visna graph from extracat package to visualize the missing pattern. It can be observed that the varibale "qzipwork" which decribes the Zipcode of the locations where the respondents work has the most missing value. Also the "qsafety"" variable group contains a large amount of missing values which will probably cause bias to our conclusion in analysis. We will just ignore these variables and focus on the rest.
+
+The other variables have few or no missing value on which we can perform further exploratory analysis safely. Given the condition of our data, we will maily concentrate on these varibales:
+1.dependent varibles:
+travel_code 
+description
+
+2.socioeconomic variables:
+gender
+age
+income
+
+3.spatial varibles:
+qzipcmb(Zipcode)
+borough
+
+4.certain group of variables related to our topics:
+qnyc(years of living in New York City)
+qchildren
+qrent
+gFREIGHT varible groups
+
+
+5.weight:
+allwt(the weight for each record, provided by the survey)
+
+In the process of exploration and analysis, we will also recode variable according to the situation and needs in analysis. The varibales we focus on generally have very few missing values. So instead of replacing them with other values, we will just exclude them when conducting analysis and plotting.
+
+```{r}
+library(extracat)
+visna(tidy_df,sort = "b")
+
+```
+
+

@@ -7,6 +7,9 @@ Imports:
   tidyverse,
   ggthemes, 
   parcoords, 
-  d3r
-Remotes: rstudio/bookdown
-
+  d3r,
+  ggmosaic,
+  choroplethr,
+  choroplethrMaps
+Remotes: 
+  rstudio/bookdown
