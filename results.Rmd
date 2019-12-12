@@ -206,8 +206,7 @@ HH::likert(Gender ~ .,
            xlab = list(label = "Residents%"),
            main = 'How Important Is It to You That Making It Safer and \n Easier to Bike by Adding Bike Lanes',
            scales = list(cex = 1),
-           auto.key.in = list(cex = 0.45)) 
-
+           auto.key.in = list(cex = 0.50)) 
 ```
 
 
@@ -402,7 +401,7 @@ ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
 ```
 
 
-![half-size image](image/subway_map.png)
+![New York City subway system map](image/subway_map.png)
 
 ## Is there any differences between the age composition of the residents choosing different transportation modes?
 
