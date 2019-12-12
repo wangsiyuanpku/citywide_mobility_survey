@@ -13,13 +13,19 @@ description: "This book holds the EDAV final project for Group 3, Fall 2019, Col
 
 # Introduction
 
-What's your mode choice if you're going to get around the New York City? Think about it and give us your answer. 
+What's your choice of transportation if you're going to get around the New York City? Think about it and give us your answer. 
 
-New York City is famous for its transportation system, a network of complex infrastructural systems, including one of the largest subway systems in the world and some other transportation modes, such as bus, car, train and ferry. Also, the traffic status is continuously improved, expecially after the launch of the Second Avenue Subway (source: New York City Mobility Report, 2018). Due to this, New York City residents have a lot of mode choices when they're out for work, traveling, picking up children, etc. 
+New York City is famous for its convenient transportation system, a network of complex infrastructural systems, including one of the largest subway systems in the world and other robust means of transportation, such as bus, car, train and ferry. Moreover, the system is continuously improving and modernizing, expecially after the launch of the Second Avenue Subway (source: New York City Mobility Report, 2018). This diverisity allows residents of New York City to have various choices when they're out for work, traveling, picking up children, etc. 
 
-But how will they decide? Back to our question proposed at the beginning, which mode you will choose to get around the New York City. You may not realize that the choice you came up with was actually the result getting after taking several factors into consideration, both sujective and objective. We are interested in identifying these factors, which drive transportation choices for New York City residents, and comparing the differences between the residents compostion in different mode choices in New York City. Also, we would like to find out the reasons causing different choices by exploratory visualization, solving some real-world problems.
+But how do they decide? Back to our question proposed at the beginning, which transporation you will choose to get around the New York City. You might not realize that the choice you came up with was actually the result getting after taking several factors into consideration, both subjective and objective. We are interested in identifying these factors, which motivate transportation choices for New York City residents, and comparing the differences between the different demographics in transportation choices in New York City. We would hope that our exploratory data analysis can distinguish interesting patterns, potentially helping the Department of Transportation (DOT) to decide on which transportation is worth further investing (or at least, helping us to decide on which transportation to use when we start our career here). 
 
-In 2017, NYC DOT launched a citywide mobility survey, a phone and online questionnaire that was taken by thousands of New Yorkers across all five boroughs. This survey assessed the residents' behaviors, as well as their attitudes and perceptions towards transportation throughout New York City, which makes it possible for us to solve the questions concerning us. 
+This bookdown is arranged as follows: 
+
+1. We first introduce our dataset: citywide mobility survey, a phone and online questionnaire launched by NYC DOT in 2017 that was taken by thousands of New Yorkers across all five boroughs. This survey assessed the residents' behaviors, as well as their attitudes and perceptions towards transportation throughout New York City, which makes it possible for us to solve the questions we raised above. 
+2. Then we briefly introduce our data transformation method and handling of missing value in Chapter 3 and 4. 
+3. We give our detailed analysis in Chapter 5. 
+4. After our analysis, we have prepared an interactive dashboard for you to do your own research and find out what's the typical preferences of transportation for your demographic in Chapter 6. 
+7. Finally, we conclude in Chapter 7. 
  
 
 
