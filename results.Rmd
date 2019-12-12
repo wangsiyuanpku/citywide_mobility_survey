@@ -6,6 +6,7 @@ library(ggthemes)
 library(ggmosaic)
 library(choroplethr)
 library(choroplethrZip)
+library(gridExtra)
 
 load("data/travel_data.rda")
 load("data/mobility_general.rda") 
@@ -1158,7 +1159,8 @@ plot_fav <- df_like %>% transmute(region = qzipcmb,
   mutate(region = as.character(region))
 nyc_fips = c(36005, 36047, 36061, 36081, 36085)
 zip_choropleth(plot_fav, county_zoom = nyc_fips,
-               title = "Favourite Transportation by Zipcode", num_colors = 5)+
+               title = "Favourite Transportation by Zipcode",
+               num_colors = 5)+
   scale_fill_brewer(na.value = "white",
                     guide_legend(title = "Favourite Transportation by Zipcode"))+
   scale_fill_manual(values = c("#4a4a4a", "#8abbd0", "purple", "#efe8d1", "#00008b"))
@@ -1183,4 +1185,472 @@ zip_choropleth(plot_friendly, county_zoom = nyc_fips,
                     labels = c("0-0.2","0.2-0.4","0.4-0.6","0.6-0.8","0.8-1","No Data"),
                     palette="Greens")
 ```
+
+## Conversion from traditional transportations to ride hail services
+
+```{r}
+load("./data/tidy_survey_data.rda") # load data as survey data
+
+tidy_survey <- tidy_survey %>% filter(!is.na(UniqueID))
+```
+
+In this section, we will try to figure out possible factors that will help explain why people choose to use a relatively new transportation service, called ride hail services. Therefore, we will mostly focus on a subset of participants who has used this kind of services before, according to the survey results. This section will be divided into three parts. First, we will get a preliminary understanding of the preferences of ride hail services at NYC by plotting basic descriptive statistics of survey questions correlated with this service. Next, we will facet the histogram of the usage frequency by several demographic features, trying to figure out underlying correlations between them. Finally, we will compare the ride hail services with several other traditional services and make inferences of what are the most important reasons that drive people to use ride hail services at NYC. 
+
+### Summary statistics of ride hail services
+
+In this section, we first plot several summary statistics of the usage of rail hail services at NYC, including 1) service coverage among people, i.e., how many people have used this service at least once; 2) the most popular ride hail service providers and 3) major travelling purposes of using rail hail services.
+
+The frequency statistics are mostly collected from the result of Q28b in the survey, while the service provider data and travelling purposes data come from results of Q28a and Q28c respectively. For clarity, we first classified the frequency to two groups, namely whether or not a participant has used the ride hail service at least once before. A finer definition of frequency will be used in the next section. Note that as a particpant may choose several service providers and several travel purposes, the total sum of percentage may exceed 100%. However, each bar will still reflects how many participants choose the corresponding statement. So we will continue using this method when dealing with multiple selected options in the following parts.
+
+The upper left plot shows that more than half of people have never used ride hail services before. The upper right plot indicates that Uber and Lyft are most widely used services providers at NYC and all the other providers have quite limited share of the users. Also the size of user group of Uber is almost twice as large as that of Lyft. 
+
+The plot in the buttom shows major purposes for which users request for a ride hail service at NYC. Not surprisingly, social and personal errands make up of the majority part of ride hail services, since ride hail services are super convenient for door to door trips. It's somehow surprising that some people also use ride hail services to commute to or from work. Although we don't have the exact number of trips of every specific purpose conducted by every participant in this dataset, we can still infer that for most people, ride hail services provide another ideal way for temporary and short trips.
+
+```{r}
+# freq of usage 
+freq_df <- data.frame(
+  freq_index = 1:9,
+  freq_value = c("Several times a week",
+                  "Once a week",
+                  "A few times a month",
+                  "Once a month",
+                  "A few times a year",
+                  "Less than a few times a year",
+                  "Don’t know / Refused",
+                  "Don’t know / Refused",
+                  "Never"))
+
+freq_df$freq_value = fct_reorder(freq_df$freq_value, freq_df$freq_index, .desc = T)
+
+users <- tidy_survey %>% 
+  select(c(UniqueID, qridehail_freq, allwt)) %>% 
+  mutate(freq = ifelse(is.na(qridehail_freq), 9, qridehail_freq)) %>% 
+  merge(freq_df, by.x = "freq", by.y = "freq_index") %>% 
+  select(c(UniqueID, allwt, freq_value))
+
+ride_hail_users <- users %>% filter(freq_value != "Never")
+
+group_by_freq <- users %>% 
+                group_by(freq_value) %>% 
+                summarise(percentage=sum(allwt) / sum(ride_hail_users$allwt)) %>% 
+                ungroup()
+```
+
+```{r}
+# Ride hail app usage
+app_usage <- tidy_survey %>% 
+  select(c(UniqueID, "Ride Hail Services")) %>% 
+  merge(ride_hail_users) %>% 
+  mutate(length = lengths(`Ride Hail Services`)) %>% 
+  filter(length > 0) %>% 
+  mutate(avgwt = allwt) %>% 
+  rename("Services" = "Ride Hail Services") %>% 
+  select(UniqueID, avgwt, Services) %>% 
+  unnest(Services) %>%
+  group_by(Services) %>%
+  summarise(wt = sum(avgwt)) %>% 
+  mutate(wt = wt / sum(wt))
+
+app_usage_plot <- ggplot(app_usage, 
+                         aes(x = fct_reorder(Services, wt, .desc = T), 
+                             y = wt)) +
+                  geom_col() +
+                  labs(x = 'App Name', y = 'Percentage',
+                       title = "Ride Hail Services App Usage") +
+                  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+                  theme_economist() +
+                  theme(axis.text.x = element_text(size = 8, angle = 0),
+                        plot.title = element_text(size = 10),
+                        legend.position = "right", 
+                        legend.title = element_blank(),
+                        legend.text = element_text(size = 9),
+                        legend.key.size = unit(0.6, "cm"))
+```
+
+```{r}
+# Ride hail purposes
+purposes <- tidy_survey %>% 
+  select(c(UniqueID, "Purpose of using ride hailing app")) %>% 
+  merge(ride_hail_users) %>% 
+  rename(purpose = "Purpose of using ride hailing app") %>% 
+  mutate(length = lengths(purpose)) %>% 
+  filter(length > 0) %>% 
+  mutate(avgwt = allwt) %>% 
+  select(c(UniqueID, avgwt, purpose)) %>% 
+  unnest(purpose) %>% 
+  mutate(purpose = fct_collapse(purpose, 
+                                Others = c("Other", "Don't know", 
+                                           "Refused"))) %>% 
+  group_by(purpose) %>% 
+  summarise(wt = sum(avgwt)) %>% 
+  mutate(wt = wt/sum(wt))
+
+purpose_plot <- ggplot(purposes, aes(x = fct_reorder(purpose, 
+                                                     wt, .desc = T), 
+                                     y = wt),) +
+                geom_col() +
+                scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+                labs(x = 'Purposes', y = 'Percentage',
+                     title = "Purposes of Using Ride Hail Services",
+                     caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+                theme_economist() +
+                theme(axis.text.x = element_text(size = 8, angle = 20, vjust = 0.5), 
+                      plot.title = element_text(size = 10),
+                      legend.position = "right", 
+                      legend.title = element_blank(),
+                      legend.text = element_text(size = 9),
+                      legend.key.size = unit(0.6, "cm"))
+```
+
+```{r}
+# Whether one has used ride-hail services at least once before
+bin_freq <- users %>% 
+            mutate(taken_before = ifelse(freq_value == "Never", 
+                                         "Never", "At least\nonce")) %>% 
+            group_by(taken_before) %>% 
+            summarise(percent = sum(allwt) / sum(users$allwt)) %>% 
+            ungroup()
+
+bin_freq_plot <- ggplot(data = bin_freq, 
+       aes(x = taken_before, y = percent)) + 
+  geom_col() +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(x = 'Usage times', y = 'Percentage',
+       title = "Ride-hail Service\nCoverage") +
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 7, angle = 20, vjust = 0.5),
+        plot.title = element_text(size = 10),
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+
+```{r}
+grid.arrange(bin_freq_plot, app_usage_plot, purpose_plot, 
+             layout_matrix = rbind(c(1,2,2,2), c(1,2,2,2),
+                                   c(3,3,3,3), c(3,3,3,3), 
+                                   c(3,3,3,3)))
+```
+
+
+### Factors that may influence frequency
+
+In this section, we want to investigate whether the frequency of using ride hail services are affected by the demographic features of the user, e.g., the region he / she lives, the income level and the age. For a specific feature, we will plot the conditional distribution of the frequency, given a specific value of that feature. The basic methodology here is comapring if two distributions look different under different conditions. If so, this feature may play an important role for explaining the frequency of using ride hail services. Otherwise, its role may be vague and not significant. In this section, the frequency is divided to several groups with a different time range, e.g. several times a month or several times a year, which is also how the survey question Q28b defines frequency.
+
+1. Region v.s. Freq
+
+The survey problem Q8 and Q9 asks for the region that the participant lives. Here we reduced all possible options to the granularity of boroughs at NYC, so there are five different regions in total. The reason why we are interested in the region feature is that different regions may have quite different transportation systems. For example, if the public transportation system is quite complete in one region, people may not use ride hail services that often, due to the higher price of each trip. Based on this assupmtion, we can plot the distribution by facetting on the region.
+
+```{r}
+regions <- tidy_survey %>% 
+  select(c(UniqueID, borough)) %>% 
+  unnest(borough)
+
+region_sum <- ride_hail_users %>% 
+  merge(regions, by = "UniqueID") %>% 
+  group_by(borough) %>% 
+  summarise(sum=sum(allwt))
+
+region_freq <- ride_hail_users %>% 
+  merge(regions, by = "UniqueID") %>% 
+  merge(region_sum, by = "borough") %>% 
+  mutate(cond_freq=allwt / sum) %>% 
+  group_by(borough, freq_value) %>% 
+  summarise(percent=sum(cond_freq))
+
+ggplot(data = region_freq, 
+       aes(x=freq_value, y=percent)) +
+  geom_col() + 
+  coord_flip() + 
+  facet_wrap(. ~ borough) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(x = 'Frequency', y = 'Percentage',
+       title = "Usage Frequency Distribution within Each Borough",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 8, angle = 0),
+        plot.title = element_text(size = 13),
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+From the previous plot that we can notice that most people in each region tend to use ride hail services a few times a month, instead of those living on Staten island. In general, people living on Staten island take ride hail trips less often compared with residents in other boroughs, which may due to the fact that Staten island is more like an isolated region compared with the others. The Brooklyn, Manhattan and Queens boroughs show similar patterns, while residents in Manhattan take ride rail trips most frequently. Although the public transportation system is almost perfect at Manhattan, people still take ride hail trips quite a lot, which somehow contradicts our initial assumption. Another explanation for this phenomenon would be, for a busier and more crowded region, the number of active drivers would also be larger. Therefore, this may shorten the average waiting time for every ride rail trip and make this service more convenient. 
+
+2. Income v.s Freq
+
+Next, we want to understand how the frequency of taking ride hail trips would be influenced by the income level, as the ride hail services may cost a little more compared with traditional green or yellow taxi. The income information comes from the results of Q6 in the survey. Here we also group the income level to 5 levels, with a span of roughly $50,000 and discard those participants who refused to report their income level. 
+
+```{r}
+income_level <- tidy_survey %>% 
+  select(c(UniqueID, qincome)) %>% 
+  mutate(fct_income=factor(qincome)) %>% 
+  mutate(fct_income=fct_collapse(fct_income,
+                                 `Less than $24,999`=c("1", "2"),
+                                 `$25,000 - $49,999`=c("3", "4"),
+                                 `$50,000 - $99,999`=c("5", "6"),
+                                 `$100,000 - $149,999`=c("7"),
+                                 `$150,000 and above`=c("8", "9"),
+                                 `Refused`=c("10", "11")))
+
+income_freq_sum <- ride_hail_users %>% 
+  merge(income_level, by = "UniqueID") %>% 
+  select(c(fct_income, allwt)) %>% 
+  filter(fct_income != "Refused") %>% 
+  group_by(fct_income) %>% 
+  summarise(sum=sum(allwt)) %>% 
+  ungroup()
+  
+income_freq <- ride_hail_users %>% 
+  merge(income_level %>% select(UniqueID, fct_income), by = "UniqueID") %>% 
+  merge(income_freq_sum, by = "fct_income") %>% 
+  mutate(cond_freq=allwt / sum) %>% 
+  group_by(fct_income, freq_value) %>% 
+  summarise(percent=sum(cond_freq))
+
+ggplot(data = income_freq, 
+       aes(x=freq_value, y=percent)) +
+  geom_col() + 
+  coord_flip() + 
+  facet_wrap(. ~ fct_income) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(x = 'Frequency', y = 'Percentage',
+       title = "Usage Frequency Distribution within Each Income Level",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 8, angle = 0),
+        plot.title = element_text(size = 13),
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+Except for the lowest income level and those who refused to declose their income level, all the other groups show quite similar distributions. For the lowest income group, the frequency distribution is more left skewed compared with the others, which indicates that people in this group will use ride rail services less often. Therefore, generally speaking, the income level is not a significant feature that influences the frequency of taking ride hail trips. From another aspect, it also reflects that the pricing rules for ride hail services are reasonable, so the price itself won't become a factor that hinder the growth of ride hail services.
+
+3. Age v.s. Freq
+
+We may also assume that ride hail services are more appealing to younger generations who are more capable of accepting new things. Therefore, we also facet on age variable in this section. We first devide the ages of all grown-ups into 6 groups, with a span of roughly 10 years in each group. We also remove those participants who refused to report their ages in this survey for clarity. The age information comes from the results of Q2 in the survey.
+
+```{r}
+map_age <- function(age_col) {
+  l <- map(age_col, function (x) {
+    case_when(
+    x >= 18 && x <= 24 ~ "18-24",
+    x >= 25 && x <= 34 ~ "25-34",
+    x >= 35 && x <= 44 ~ "35-44",
+    x >= 45 && x <= 54 ~ "45-54",
+    x >= 55 && x <= 64 ~ "55-64",
+    x > 64  && x < 200 ~ ">=65",
+    TRUE ~ "Refused"
+  )
+  })
+  unlist(l)
+}
+
+ages <- tidy_survey %>% 
+  select(c(UniqueID, qage)) %>% 
+  mutate(fct_age = map_age(qage)) %>% 
+  filter(fct_age != "Refused")
+
+age_sum <- ride_hail_users %>% 
+  merge(ages, by = "UniqueID") %>% 
+  group_by(fct_age) %>% 
+  summarise(sum = sum(allwt))
+
+age_freq <- ride_hail_users %>% 
+  merge(ages, by = "UniqueID") %>% 
+  merge(age_sum, by = "fct_age") %>% 
+  mutate(cond_prob = allwt / sum) %>% 
+  group_by(fct_age, freq_value) %>% 
+  summarise(percent = sum(cond_prob))
+
+ggplot(data = age_freq, 
+       aes(x = freq_value, y = percent)) +
+  geom_col() + 
+  coord_flip() + 
+  facet_wrap(. ~ fct_age) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(x = 'Frequency', y = 'Percentage',
+       title = "Usage Frequency Distribution within Each Age Level",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 8, angle = 0),
+        plot.title = element_text(size = 13),
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+For people younger than 55 years old, the patterns are quite similar. The majority of users in these group take ride hail trips a few times a month, and older people tend to take ride hail trip less frequently, which can be observed as the increasing ratio of people with frequency smaller than once a month. For those who are retired, the ratio of "less than a few times in a year" is the largest compared with other groups. However, it's surprising that for those great than 65 years old, over 30% of them still takes ride hail trips a few times a month. So it may indicate that the newly born ride hail services is quite user friendly with elder people. 
+
+4. With / Without Car v.s Freq
+
+Last, we want to check whether the access of a personal car will influence the choice of taking ride hail services. Mostly, we will guess that those without access to a car would be more likely to use ride hail services to travel around. The car access information comes from the results of Q24, and we reduce the results to two groups indicating whether a participant has access to a car.
+
+```{r}
+car_access <- tidy_survey %>% 
+  select(c(UniqueID, qcaraccess)) %>% 
+  merge(ride_hail_users, by = "UniqueID") %>% 
+  mutate(has_car = ifelse(qcaraccess %in% c(1,2), "Has access to a car", "No access to a car")) %>% 
+  select(c(UniqueID, has_car))
+
+car_access_sum <- car_access %>%
+  merge(ride_hail_users, by = "UniqueID") %>% 
+  group_by(has_car) %>% 
+  summarise(sum = sum(allwt))
+
+car_access_freq <- ride_hail_users %>% 
+  merge(car_access, by = "UniqueID") %>% 
+  merge(car_access_sum, by = "has_car") %>% 
+  mutate(cond_prob = allwt / sum) %>% 
+  group_by(has_car, freq_value) %>% 
+  summarise(percent = sum(cond_prob))
+
+ggplot(data = car_access_freq, 
+       aes(x = freq_value, y = percent)) +
+  geom_col() + 
+  coord_flip() + 
+  facet_wrap(. ~ has_car, nrow = 2) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(x = 'Frequency', y = 'Percentage',
+       title = "Usage Frequency Distribution with/without Car Access",
+       caption = "Source: https://data.cityofnewyork.us/Transportation/Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") +
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 8, angle = 0),
+        plot.title = element_text(size = 13),
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+The results are quite interesting. For relatively high frerquency of using ride hail services, namely from several times a week to once a month, the ratios in the group of participants with no access to car are larger than the counterparts in the other group, indicating that those without a car will use ride hail services more frequently. For relatively low frequencies, i.e., when the frequency is calculated in the range of years, corresponsing ratios are larger in the group with car access. The general pattern of both distribution is still similar without a huge distinction. And this may come from the fact that those without cars will also use other transportation methods as a substitute and those with cars may also use ride hail services when parking is hard. 
+
+### Comparison between ride-hail services and other transportations
+
+In this section, we focus on the internel reasons that a ride hail service user relies on when making choices of transportation methods. We first find out what used to be the method of transportation prior to the existence of using ride hail services. This is asked by Q28d-Q28h. By filtering out top options, we then compare the feelings and descriptions of these methods along with ride hail services given by ride hail service users, in order to find an explanation of why these transitions happen. Those descriptions are results from Q37, where the particpants were asked to select appropriate descriptions for these transportation methods. Note that a participant may select more than one feature for each transportation tool.
+
+```{r}
+before_ride_hail <- tidy_survey %>% select(c(UniqueID, "Prior to Riding Hail", allwt)) %>% 
+  rename("previous_travel"="Prior to Riding Hail") %>% 
+  mutate(length=lengths(previous_travel)) %>%
+  filter(length > 0) %>% 
+  mutate(avgwt = allwt) %>% 
+  select(c(UniqueID, avgwt, previous_travel)) %>% 
+  unnest(previous_travel) %>% 
+  group_by(previous_travel) %>% 
+  summarise(wt=sum(avgwt))
+
+before_ride_hail_groups <- before_ride_hail %>% 
+  mutate(group_code=fct_collapse(previous_travel, 
+                                 `Car Services`=c("Carpool", "Car service", "Carshare"),
+                                 `Bike / Motorcycle`=c("Citi Bike", "Electric Bike", "Motorcycle", 
+                                                       "Personal bicycle"),
+                                 Bus=c("Community van/ dollar van", "Express bus", "Local bus",  
+                                       "Paratransit/ Access-a-Ride", "Select bus service"),
+                                 Train=c("Commuter rail","PATH train"),
+                                 `Don't know / Other`=c("Don’t know", "Other"),
+                                 Taxi=c("Green taxi", "Yellow taxi"),
+                                 Ferry=c("Staten Island feryy", "Other ferry")
+                                 )) %>% 
+  group_by(group_code) %>% 
+  summarise(wt=sum(wt)) %>%
+  mutate(percentage=wt/sum(wt))
+```
+
+```{r}
+prior_method_plots <-  ggplot(before_ride_hail_groups, aes(x=fct_reorder(group_code, wt), y=percentage)) + 
+  geom_col() + 
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(x = 'Prior Transportation Methods', y = 'Percentage') +
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 8, angle = 0),
+        plot.title = element_text(size = 13),
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(0.6, "cm"))
+```
+
+```{r}
+map_type <- function(descriptions) {
+  unlist(map(descriptions, function(x) {
+    case_when(
+    str_detect(x, coll("Ride-hail")) ~ "Ride-hail",
+    str_detect(x, coll("Bus")) ~ "Bus",
+    str_detect(x, coll("Subway")) ~ "Subway",
+    str_detect(x, coll("Taxis")) ~ "Taxis",
+  )
+  }))
+}
+
+prefix_table <- data.frame(
+  type=c("Ride-hail", "Bus", "Subway", "Taxis"),
+  prefix=c("Ride-hail services (i.e. Uber or Lyft) ",
+           "Bus ",
+           "Subway ",
+           "Taxis (i.e. Yellow taxi, green taxi, or car service) ")
+)
+
+reasons <- tidy_survey %>% select(c(UniqueID, Description)) %>% 
+  merge(ride_hail_users, by = "UniqueID") %>% 
+  unnest(Description) %>% 
+  mutate(type=map_type(Description)) %>% 
+  filter(! is.na(type)) %>% 
+  merge(prefix_table, by = "type") %>% 
+  mutate(reason=str_remove(Description, coll(prefix))) %>% 
+  select(c(UniqueID, type, reason, allwt))
+```
+
+```{r}
+reasons_group <- reasons %>% 
+  mutate(reason=fct_collapse(reason, `Don't know /\nRefused`=c("Don't know", "Refused"))) %>% 
+  group_by(type, reason) %>% 
+  summarise(wt=sum(allwt)) %>% 
+  ungroup() %>% 
+  mutate(wt=wt / sum(ride_hail_users$allwt)) %>% 
+  mutate(type=factor(type, levels = c("Ride-hail", "Bus", "Subway", "Taxis")))
+```
+
+```{r}
+reasons_ride_hail <- reasons_group %>% 
+  filter(type == "Ride-hail") %>% 
+  mutate(ride_hail_wt=wt) %>% 
+  select(c(reason, ride_hail_wt))
+
+reasons_group <- reasons_group %>% 
+  merge(reasons_ride_hail, by = "reason")
+```
+
+```{r}
+reasons_plot <- ggplot(reasons_group, aes(x=fct_reorder(reason, ride_hail_wt), y=wt)) + 
+  geom_point(aes(colour=type, shape=type, size=type)) +
+  coord_flip() +
+  xlab("Descriptions") +
+  ylab("Percentage") +
+  scale_size_manual(values=c(4,4,4,5) - 1) +
+  scale_shape_manual(values=15:18) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(x = "Description", y = "Percentage", 
+       caption = "Source: https://data.cityofnewyork.us/Transportation/
+       Citywide-Mobility-Survey-Main-Survey/dd6w-hnq9") + 
+  theme_economist() +
+  theme(axis.text.x = element_text(size = 8, angle = 0), 
+        plot.title = element_text(size = 13), 
+        legend.position = "right", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9))
+```
+
+```{r}
+grid.arrange(prior_method_plots, reasons_plot, layout_matrix = rbind(c(1,1,1,2,2,2,2)))
+```
+
+Note that in the left plot, the top-3 methods prior to using ride hail services are bus, subway and taxi. Therefore, in the right plot, we provided the descriptions of these methods along with ride hail services. As shown in the plot, the top-3 descriptions of ride hail services are convenient, comfortable and realiable. And the margins between ride hail services and all the others are quite large for these three descriptions, so we can regard them as top reasons explaining why a user would prefer ride hail services. Also note that the only disadvantage of ride hail service is that it's more expensive than bus and railway, but users still believe that taxis are more expensive then ride hail service, which is somehow surprising. Since these plots are only based on the responses of participants who have used ride hail services at least once, there may exist a bias for ride hail services in the conclusion. However, it still reflects that users are quite satisfied with this new type of service and the user loyalty rate is high. Therefore, it's reasonable to assume that the ride hail services will still grow with all these advantages, and may even surpass traditional taxis in the future.
 
