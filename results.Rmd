@@ -130,8 +130,9 @@ ggplot(survey_1, aes(x = Prop, y = reorder(Description, -Order), color = factor(
         legend.position = "bottom", 
         legend.title = element_blank(),
         legend.text = element_text(size = 9))
+```
 
-
+```{r}
 survey_2 <- merge(travel_mode, Survey, by = "UniqueID", all.y = TRUE) %>%
   filter(Bicycle == 1) %>%  # Only forcus on those did not choose bicycle
   subset(select = c(1, 10:19)) %>%
@@ -161,6 +162,53 @@ ggplot(survey_2, aes(x = Prop, y = reorder(Description, -Order),
         legend.title = element_blank(),
         legend.text = element_text(size = 9))
 ```
+
+There's a question in the questionnaire which is "How important is it to you that making it safer and easier to bike by adding bike lanes". This helps us decide one aspect which people think causes the unsafety of riding bicycle in New York City. We plot it into a diverted bar chart. It shows that both males and females think adding bike lanes are really important, although with different degree. This indicate that the current number of bike lanes in NYC are still not enough and car accident may negatively influence the proportion of residents who would like to ride a bicycle to get around the city.
+
+```{r}
+important <- df_general[c(1, 2, 22, 31)] 
+colnames(important) <- c("UniqueID", "Gender", "Importance", "allwt")
+important <- important %>% 
+  mutate(Importance = recode(Importance, `1` = "Extremely important", 
+                       `2` = "Very important",
+                       `3` = "Somewhat important",
+                       `4` = "Not very important", 
+                       `5` = "Not at all important",
+                       `6` = "Don’t know", 
+                       `7` = "Refused", 
+                       `99` = "Redused")) %>%
+  spread(key = Importance, value = allwt) %>%
+  mutate_at(c(3:9), ~replace(., is.na(.), 0)) %>%
+  group_by(Gender) %>%
+  summarise(`Extremely important` = sum(`Extremely important`), 
+            `Very important` = sum(`Very important`),
+            `Somewhat important` = sum(`Somewhat important`),
+            `Not very important` = sum(`Not very important`),
+            `Not at all important` = sum(`Not at all important`),
+            `Refused` = sum(`Refused`)) %>%
+  filter(Gender %in% c(1, 2)) %>%
+  mutate(Gender = recode(Gender, `1` = "Male",
+                         `2` = "Female")) %>%
+  mutate(Sum = `Extremely important` + `Very important` + `Somewhat important`
+         + `Not very important` + `Not at all important` + `Refused`) %>%
+  mutate(`Extremely important` = 100 * `Extremely important` / Sum,
+         `Very important` = 100 * `Very important` / Sum,
+         `Somewhat important` = 100 * `Somewhat important` / Sum,
+         `Not very important` = 100 * `Not very important` / Sum,
+         `Not at all important` = 100 * `Not at all important` / Sum,
+         `Refused` = 100 * `Refused` / Sum) %>%
+  subset(select = c(1:7))
+
+HH::likert(Gender ~ ., 
+           data = important,
+           positive.order = TRUE,
+           xlab = list(label = "Residents%"),
+           main = 'How Important Is It to You That Making It Safer and \n Easier to Bike by Adding Bike Lanes',
+           scales = list(cex = 1),
+           auto.key.in = list(cex = 0.45)) 
+
+```
+
 
 
 ## Is there any differences between the income composition of the residents choosing different transportation modes?
@@ -351,6 +399,8 @@ ggplot(borough, aes(fct_reorder(Borough, -Prop), Prop)) +
         legend.text = element_text(size = 9),
         legend.key.size = unit(0.6, "cm"))
 ```
+
+
 ![](image/subway_map.png)
 
 ## Is there any differences between the age composition of the residents choosing different transportation modes?
