@@ -200,13 +200,17 @@ important <- important %>%
          `Refused` = 100 * `Refused` / Sum) %>%
   subset(select = c(1:7))
 
+important <- important[, c(6, 5, 7, 4, 3, 2, 1)]
+
 HH::likert(Gender ~ ., 
            data = important,
            positive.order = TRUE,
-           xlab = list(label = "Residents%"),
+           xlab = list(label = "Gender"),
+           ylab = list(label = "Respondents%"),
            main = 'How Important Is It to You That Making It Safer and \n Easier to Bike by Adding Bike Lanes',
            scales = list(cex = 1),
-           auto.key.in = list(cex = 0.50)) 
+           auto.key.in = list(cex = 0.90),
+           horizontal = FALSE) 
 ```
 
 
